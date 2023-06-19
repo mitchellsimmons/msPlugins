@@ -1,6 +1,8 @@
 ﻿# msPlugins
 
-Repository containing collections of plugins for Autodesk Maya.
+A set of plugins for Autodesk Maya.
+
+**_NOTE:_**  This repository is no longer actively maintained.
 
 ## _Dependencies_
 
