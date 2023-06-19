@@ -1,0 +1,24 @@
+// ------ Scale Adjustment Window - Replace -------------------------------------------------------------------------------------------------------------------------------------------
+
+global string $MRS_FlexiSpine_ScaleAdjustmentUI_WorkspaceControl = "MRS_FlexiSpine_ScaleAdjustmentUI_WorkspaceControl";
+global string $MRS_FlexiSpine_ScaleAjustmentUI = "MRS_FlexiSpine_ScaleAjustmentUI";
+
+global proc MRS_FlexiSpine_scaleAdjustmentUIReplace(string $nodeManipPlugName)
+{
+	// Global values
+	global string $MRS_FlexiSpine_ScaleAdjustmentUI_WorkspaceControl;
+	global string $MRS_FlexiSpine_ScaleAjustmentUI;
+	
+	if (`workspaceControl -q -exists $MRS_FlexiSpine_ScaleAdjustmentUI_WorkspaceControl` && `workspaceControl -q -visible $MRS_FlexiSpine_ScaleAdjustmentUI_WorkspaceControl`)
+	{
+		if (`window -q -exists $MRS_FlexiSpine_ScaleAjustmentUI`)
+		{
+			if (`window -q -title $MRS_FlexiSpine_ScaleAjustmentUI` == ($nodeManipPlugName + ".scaleAdjustmentRamp"))
+				return;
+		}
+		
+		int $isCollapsed = `workspaceControl -q -collapse $MRS_FlexiSpine_ScaleAdjustmentUI_WorkspaceControl`;
+		MRS_FlexiSpine_scaleAdjustmentUINew $nodeManipPlugName;
+		workspaceControl -e -collapse $isCollapsed $MRS_FlexiSpine_ScaleAdjustmentUI_WorkspaceControl;
+	}
+}

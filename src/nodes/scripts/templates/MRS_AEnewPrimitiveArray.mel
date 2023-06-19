@@ -1,0 +1,72 @@
+// Source scripts for access to internal globals
+source "AEnewNonNumericMulti.mel";
+
+
+// ------ Private ------------------------------------------------------------------------------------------------------------------------------------------------
+
+//  Description
+//  -----------
+//  This procedure creates a new layout for primitive array attributes and adds controls for any existing elements
+//  Instead of implementing the default functionality Maya uses for primitive array types, we implement similiar logic to that which can be found in the file "AEnewNonNumericMulti"
+//  The compound version allows the user to manually add/remove elements via the Attribute Editor which the standard multi implementation does not
+//  We also ensure each control is named with the correct logical index (Maya displays physical indices by default)
+//  This procedure will return the name of the outermost frameLayout which should be used to access child controls
+global proc string MRS_AEnewPrimitiveArray(string $nodeAttrName, string $annotation)
+{
+    // Global values
+    global int $gMaxNonNumericMultis;
+
+    // Data
+    string $buffer[];
+    tokenize($nodeAttrName, ".", $buffer);
+    string $nodeName = $buffer[0];
+    string $attrName = $buffer[1];
+    string $attrNiceName = `attributeName -nice $nodeAttrName`;
+
+    int $elementIndices[] = `getAttr -multiIndices $nodeAttrName`;
+    int $numElements = size($elementIndices);
+
+    // UI
+    string $frameLayout_main = `frameLayout -collapsable true -label $attrNiceName -collapse false -annotation $annotation`;
+
+        text -label "" -height 1;
+
+        // Hide the columnLayout while we're creating controls
+        string $columnLayout_main = `columnLayout -adj true -rowSpacing 4 -vis false`;
+
+            // "Add New Item" button
+            rowLayout -numberOfColumns 2;
+
+                text -label "";
+                // This proc adds a new element plug to the array (it exists in the "AEnewNonNumericMulti" file)
+                // We then rely on the attribute editor refreshing and calling the replace proc which will result in the UI controls being added
+                button -label (uiRes("m_AEnewNonNumericMulti.kAddNewItem")) -command ("AEnewNonNumericMultiAddNewItem " + $nodeName + " " + $attrName);
+
+            setParent ..;
+
+            // If there are more than $gMaxNonNumericMultis elements, clip them
+            int $tooBig = 0;
+            if ( $numElements > $gMaxNonNumericMultis )
+            {
+                $tooBig = $numElements - $gMaxNonNumericMultis;
+                $numElements = $gMaxNonNumericMultis;
+            }
+
+            // Build controls for existing element plugs (each control will be created under a parent rowLayout)
+            // The "AEnewFloat" proc can be used for integer type arrays as well (there is really no functional difference in implementation)
+            for ( $i = 0; $i < $numElements; $i++ )
+                AEnewNonNumericMultiCreateNewControl( $nodeName, $attrName, "\"\"", "AEnewFloat", $elementIndices[$i]);
+            
+            // Tell the user if there are elements that we cannot display
+            if ( $tooBig > 0 )
+                text -l `format -s $tooBig (uiRes("m_AEnewNonNumericMulti.kInsufficientRoom"))`;
+
+        setParent ..;
+
+        // Make the columnLayout visible
+        columnLayout -e -vis true $columnLayout_main;
+
+    setParent ..;
+
+    return $frameLayout_main;
+}

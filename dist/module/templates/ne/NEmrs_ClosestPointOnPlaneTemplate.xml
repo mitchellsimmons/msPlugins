@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+	<using package='maya'/>
+	<template name='NEmrs_ClosestPointOnPlane'>
+		<attribute name='message' type='maya.message'>
+			<label>Message</label>
+		</attribute>
+		<attribute name='output' type='maya.double3'>
+			<label>Output</label>
+		</attribute>
+		<attribute name='target' type='maya.double3'>
+			<label>Target</label>
+		</attribute>
+		<attribute name='normalToPlane' type='maya.double3'>
+			<label>Normal To Plane</label>
+		</attribute>
+		<attribute name='pointOnPlane' type='maya.double3'>
+			<label>Point On Plane</label>
+		</attribute>
+	</template>
+	<view name='NEDefault' template='NEmrs_ClosestPointOnPlane'>
+		<property name='message'/>
+		<property name='output'/>
+		<property name='target'/>
+		<property name='normalToPlane'/>
+		<property name='pointOnPlane'/>
+	</view>
+</templates>

@@ -1,0 +1,15 @@
+// ------ AE Template ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc AE${NODE_NAME_PREFIX}UnpackDoubleArrayTemplate( string $nodeName )
+{
+    editorTemplate -beginScrollLayout;
+
+    // Defaults
+    AEdependNodeTemplate $nodeName;
+    editorTemplate -addExtraControls;
+
+    // Suppress controls
+    editorTemplate -suppress "input";
+
+    editorTemplate -endScrollLayout;
+}

@@ -1,0 +1,40 @@
+// ------ AE Template ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc AEmrs_PolarToCartesianTemplate( string $nodeName )
+{
+    editorTemplate -beginScrollLayout;
+
+    editorTemplate -beginLayout "Inputs" -collapse 0;
+
+        MRS_AEspacer();
+        
+        editorTemplate -label "Angle" -addControl "angle";
+
+        MRS_AEspacer();
+
+		editorTemplate -label "Radius" -addControl "radius";
+
+        MRS_AEspacer();
+
+    editorTemplate -endLayout;
+
+    editorTemplate -beginLayout "Outputs" -collapse 1;
+
+        MRS_AEspacer();
+        
+        editorTemplate -label "Output X" -addControl "outputX";
+
+        MRS_AEspacer();
+
+		editorTemplate -label "Output Y" -addControl "outputY";
+
+        MRS_AEspacer();
+
+    editorTemplate -endLayout;
+
+    // Defaults
+    AEdependNodeTemplate $nodeName;
+    editorTemplate -addExtraControls;
+
+    editorTemplate -endScrollLayout;
+}

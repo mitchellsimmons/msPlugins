@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+	<using package='maya'/>
+	<using package='std'/>
+	<template name='NE${NODE_NAME_PREFIX}SelectSurface'>
+		<attribute name='message' type='maya.message'>
+			<label>Message</label>
+		</attribute>
+		<attribute name='output' type='maya.nurbsSurface'>
+			<label>Output</label>
+		</attribute>
+		<attribute name='condition' type='maya.bool'>
+			<label>Condition</label>
+		</attribute>
+		<attribute name='ifFalse' type='maya.nurbsSurface'>
+			<label>If False</label>
+		</attribute>
+		<attribute name='ifTrue' type='maya.nurbsSurface'>
+			<label>If True</label>
+		</attribute>
+	</template>
+	<view name='NEDefault' template='NE${NODE_NAME_PREFIX}SelectSurface'>
+		<property name='message'/>
+		<property name='output'/>
+		<property name='condition'/>
+		<property name='ifFalse'/>
+		<property name='ifTrue'/>
+	</view>
+</templates>

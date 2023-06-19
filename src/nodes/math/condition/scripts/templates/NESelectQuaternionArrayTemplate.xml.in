@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+	<using package='maya'/>
+	<template name='NE${NODE_NAME_PREFIX}SelectQuaternionArray'>
+		<attribute name='message' type='maya.message'>
+			<label>Message</label>
+		</attribute>
+		<attribute name='output' type='maya.${NODE_NAME_PREFIX}QuaternionArray'>
+			<label>Output</label>
+		</attribute>
+		<attribute name='condition' type='maya.bool'>
+			<label>Condition</label>
+		</attribute>
+		<attribute name='ifFalse' type='maya.${NODE_NAME_PREFIX}QuaternionArray'>
+			<label>If False</label>
+		</attribute>
+		<attribute name='ifTrue' type='maya.${NODE_NAME_PREFIX}QuaternionArray'>
+			<label>If True</label>
+		</attribute>
+	</template>
+	<view name='NEDefault' template='NE${NODE_NAME_PREFIX}SelectQuaternionArray'>
+		<property name='message'/>
+		<property name='output'/>
+		<property name='condition'/>
+		<property name='ifFalse'/>
+		<property name='ifTrue'/>
+	</view>
+</templates>

@@ -1,0 +1,40 @@
+// ------ AE Template ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc AE${NODE_NAME_PREFIX}LerpTemplate( string $nodeName )
+{
+    editorTemplate -beginScrollLayout;
+
+    editorTemplate -beginLayout "Inputs" -collapse 0;
+
+        MRS_AEspacer();
+        
+        editorTemplate -label "Input 1" -addControl "input1";
+
+        MRS_AEspacer();
+        
+        editorTemplate -label "Input 2" -addControl "input2";
+
+        MRS_AEspacer();
+
+        editorTemplate -label "T" -addControl "t";
+
+        MRS_AEspacer();
+
+    editorTemplate -endLayout;
+
+    editorTemplate -beginLayout "Outputs" -collapse 1;
+
+        MRS_AEspacer();
+        
+        editorTemplate -label "Output" -addControl "output";
+
+        MRS_AEspacer();
+
+    editorTemplate -endLayout;
+
+    // Defaults
+    AEdependNodeTemplate $nodeName;
+    editorTemplate -addExtraControls;
+
+    editorTemplate -endScrollLayout;
+}

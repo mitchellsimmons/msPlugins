@@ -1,0 +1,74 @@
+<!--
+This is an alternative to the "mayaTexture2DBasic" fragment which outputs a float4 value (rgba)
+This fragment outputs a float3 value (rgb)
+It uses a system parameter for the "uvCoord" input so that it can be automatically populated by the render system
+-->
+
+<fragment  uiName="mrsTexture2D" name="mrsTexture2D" type="plumbing" class="ShadeFragment" version="1.0" >
+    <description>
+        <![CDATA[Simple 2D texture sampling fragment that outputs a float3 rgb value]]>
+    </description>
+        
+    <properties>
+		<float2 name="uvCoord" semantic="mayaUvCoordSemantic" flags="varyingInputParam" />
+		<texture2 name="map" />
+		<sampler name="mapSampler" />
+    </properties>
+    
+    <values>
+    </values>
+    
+    <outputs>
+        <float3  name="output" />
+    </outputs>
+    
+    <implementation  >
+        <implementation  render="OGSRenderer" language="HLSL" lang_version="11.000000" >
+            <function_name val="mrsTexture2D" />
+            <source>
+                <![CDATA[
+                float3 mrsTexture2D(float2 uv, Texture2D map, sampler mapSampler)
+                {
+	                return map.Sample(mapSampler, uv).rgb; 
+                }
+                ]]>
+            </source>
+        </implementation>
+      
+        <implementation  render="OGSRenderer" language="Cg" lang_version="2.100000" >
+            <function_name val="mrsTexture2D" />
+            <source>
+                <![CDATA[
+                float3 mrsTexture2D(float2 uv, texture2D map, sampler2D mapSampler)
+                {
+	                return tex2D(mapSampler, uv).rgb; 
+                }
+                ]]>
+            </source>
+        </implementation>
+          
+        <implementation  render="OGSRenderer" language="GLSL" lang_version="3.000000" >
+            <function_name val="mrsTexture2D" />
+            <source>
+                <![CDATA[
+                vec3 mrsTexture2D(vec2 uv, sampler2D mapSampler)
+                {
+	                return texture(mapSampler, uv).rgb; 
+                }
+                ]]>
+            </source>
+        </implementation>
+              
+        <implementation  render="OGSRenderer" language="HLSL" lang_version="10.000000" >
+            <function_name val="mrsTexture2D" />
+            <source>
+                <![CDATA[
+                float3 mrsTexture2D(float2 uv, Texture2D map, sampler mapSampler)
+                {
+	                return map.Sample(mapSampler, uv).rgb; 
+                }
+                ]]>
+            </source>
+        </implementation>
+    </implementation>
+</fragment>

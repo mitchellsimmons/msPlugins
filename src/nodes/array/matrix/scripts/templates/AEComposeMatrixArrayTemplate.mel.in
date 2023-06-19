@@ -1,0 +1,38 @@
+// ------ AE Template ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc AE${NODE_NAME_PREFIX}ComposeMatrixArrayTemplate( string $nodeName )
+{
+    string $annotation;
+
+    editorTemplate -beginScrollLayout;
+
+    editorTemplate -beginLayout "General" -collapse 0;
+
+		MRS_AEspacer();
+
+        $annotation = "Defines which rotational input is used in the composition.";
+        editorTemplate -label "Use Euler Rotation" -annotation $annotation -addControl "useEulerRotation";
+
+        MRS_AEspacer();
+
+        $annotation = "Defines the size of the output array. If an input array is smaller than the given size, default values will be used to generate the remaining outputs.";
+        editorTemplate -label "Size" -annotation $annotation -addControl "size";
+
+        MRS_AEspacer();
+
+    editorTemplate -endLayout;
+
+    // Default controls
+    AEdependNodeTemplate $nodeName;
+    editorTemplate -addExtraControls;
+
+    // Suppress controls
+    editorTemplate -suppress "translation";
+    editorTemplate -suppress "rotation";
+    editorTemplate -suppress "scale";
+    editorTemplate -suppress "quaternion";
+    editorTemplate -suppress "rotationOrder";
+    editorTemplate -suppress "output";
+
+    editorTemplate -endScrollLayout;
+}

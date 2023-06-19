@@ -1,0 +1,20 @@
+global proc string MRS_findTexture2D()
+{
+    string $texture2DPath = "";
+    string $scriptPathConcat = `getenv MAYA_SCRIPT_PATH`;
+    string $scriptPathBuffer[];
+    tokenize($scriptPathConcat, ";", $scriptPathBuffer);
+    for ($i = 0; $i < size($scriptPathBuffer); ++$i)
+    {
+        string $scriptPath = $scriptPathBuffer[$i];
+        string $fileNameBuffer[] = `getFileList -folder $scriptPath -filespec "*.xml"`;
+        for ($j = 0; $j < size($fileNameBuffer); ++$j)
+        {
+            string $fileName = $fileNameBuffer[$j];
+            if ($fileName == "MRS_texture2D.xml")
+                $texture2DPath = $scriptPath + "/" + $fileName;
+        }
+    }
+    
+    return $texture2DPath;
+}

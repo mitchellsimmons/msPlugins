@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+	<using package='maya'/>
+	<using package='std'/>
+	<template name='NE${NODE_NAME_PREFIX}SelectCurve'>
+		<attribute name='message' type='maya.message'>
+			<label>Message</label>
+		</attribute>
+		<attribute name='output' type='maya.nurbsCurve'>
+			<label>Output</label>
+		</attribute>
+		<attribute name='condition' type='maya.bool'>
+			<label>Condition</label>
+		</attribute>
+		<attribute name='ifFalse' type='maya.nurbsCurve'>
+			<label>If False</label>
+		</attribute>
+		<attribute name='ifTrue' type='maya.nurbsCurve'>
+			<label>If True</label>
+		</attribute>
+	</template>
+	<view name='NEDefault' template='NE${NODE_NAME_PREFIX}SelectCurve'>
+		<property name='message'/>
+		<property name='output'/>
+		<property name='condition'/>
+		<property name='ifFalse'/>
+		<property name='ifTrue'/>
+	</view>
+</templates>

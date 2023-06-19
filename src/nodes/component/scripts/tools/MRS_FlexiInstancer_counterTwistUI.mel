@@ -1,0 +1,461 @@
+// ------ Counter Twist Window -------------------------------------------------------------------------------------------------------------------------------------------
+
+// Global optionVar names
+global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeRange = "MRS_FlexiInstancer_CounterTwistUI_TimeRange";
+global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_StartTime = "MRS_FlexiInstancer_CounterTwistUI_StartTime";
+global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_EndTime = "MRS_FlexiInstancer_CounterTwistUI_EndTime";
+global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeStep = "MRS_FlexiInstancer_CounterTwistUI_TimeStep";
+
+// Global values
+global int $MRS_FlexiInstancer_CounterTwistUI_Value_DefaultTimeRangeIndex = 0;
+global float $MRS_FlexiInstancer_CounterTwistUI_Value_DefaultStartTime = 0.0;
+global float $MRS_FlexiInstancer_CounterTwistUI_Value_DefaultEndTime = 24.0;
+global float $MRS_FlexiInstancer_CounterTwistUI_Value_DefaultTimeStep = 1.0;
+
+global proc MRS_FlexiInstancer_counterTwistUI(string $shapeNodeName)
+{
+	// Global optionVar names
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeRange;
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_StartTime;
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_EndTime;
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeStep;
+
+	// Global control names
+	global string $MRS_FlexiInstancer_CounterTwistUI = "MRS_FlexiInstancer_CounterTwistUI"; // Static, so Maya can store preferences
+	global string $MRS_FlexiInstancer_CounterTwistUI_Text_State;
+	global string $MRS_FlexiInstancer_CounterTwistUI_RadioCollection_TimeRange;
+	global string $MRS_FlexiInstancer_CounterTwistUI_RadioButton_TimeSlider;
+	global string $MRS_FlexiInstancer_CounterTwistUI_RadioButton_StartEnd;
+	global string $MRS_FlexiInstancer_CounterTwistUI_FloatField_StartTime;
+	global string $MRS_FlexiInstancer_CounterTwistUI_FloatField_EndTime;
+	global string $MRS_FlexiInstancer_CounterTwistUI_FloatField_TimeStep;
+
+	// Ensure optionVars exist
+	MRS_FlexiInstancer_createCounterTwistUIDefaultSettings();
+
+	// Current optionVar values
+	int $currentTimeRangeIndex = `optionVar -q $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeRange`;
+	float $currentStartTime = `optionVar -q $MRS_FlexiInstancer_CounterTwistUI_OptionVar_StartTime`;
+	float $currentEndTime = `optionVar -q $MRS_FlexiInstancer_CounterTwistUI_OptionVar_EndTime`;
+	float $currentTimeStep = `optionVar -q $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeStep`;
+
+	// Callback control names
+	string $rowLayout_startTime = "MRS_FlexiInstancer_CounterTwistUI_RowLayout_StartTime";
+	string $rowLayout_endTime = "MRS_FlexiInstancer_CounterTwistUI_RowLayout_EndTime";
+
+	// Build window
+	if (`window -exists $MRS_FlexiInstancer_CounterTwistUI`)
+	{
+		deleteUI $MRS_FlexiInstancer_CounterTwistUI;
+		//windowPref -remove $MRS_FlexiInstancer_CounterTwistUI;
+	}
+
+	window
+		-title "Counter Twist Options" -menuBar true -widthHeight 500 318 -docTag $shapeNodeName
+		$MRS_FlexiInstancer_CounterTwistUI;
+
+	menu -label "Edit";
+		menuItem -label "Save Settings" -command "MRS_FlexiInstancer_saveCounterTwistUICustomSettings";
+		menuItem -label "Reset Settings" -command "MRS_FlexiInstancer_resetCounterTwistUIDefaultSettings";
+
+	string $formLayout_outerMain = `formLayout`;
+
+		// The top border gets cutoff (fix applied later)
+		string $tabLayout_main = `tabLayout -tabsVisible false`;
+		
+		// Attach the tabLayout at the given offsets
+		formLayout -e
+			-attachForm $tabLayout_main "top"    0
+			-attachForm $tabLayout_main "left"   7
+			-attachForm $tabLayout_main "bottom" 40 // Offset (7) + button height (25) + button offset (7)
+			-attachForm $tabLayout_main "right"  7
+			$formLayout_outerMain;
+			
+			string $formLayout_innerMain = `formLayout`;
+			
+				string $scrollLayout_main = `scrollLayout -childResizable true`;
+			
+				// Attach the scroll layout at the given offsets
+				formLayout -e
+					-attachForm $scrollLayout_main "top"    7
+					-attachForm $scrollLayout_main "left"   7
+					-attachForm $scrollLayout_main "bottom" 7
+					-attachForm $scrollLayout_main "right"  7
+					$formLayout_innerMain;
+					
+					columnLayout -adjustableColumn true -rowSpacing 7;
+						
+						frameLayout -label "Info" -collapsable true -backgroundShade true -marginHeight 7;
+						
+							rowLayout -numberOfColumns 2 -adjustableColumn 2 -columnAttach 1 "right" 40 -columnWidth 1 175;
+							
+								text -label "Cache :";
+								text -label ($shapeNodeName + ".counterTwist") -align "left" -font "boldLabelFont";
+							
+							setParent ..;
+							
+							rowLayout -numberOfColumns 2 -adjustableColumn 2 -columnAttach 1 "right" 40 -columnWidth 1 175;
+							
+								text -label "State :";
+								if (`keyframe -q -keyframeCount ($shapeNodeName + ".counterTwist")`)
+								{
+									$MRS_FlexiInstancer_CounterTwistUI_Text_State = `text -label "Data exists" -align "left"`;
+								}
+								else
+								{
+									$MRS_FlexiInstancer_CounterTwistUI_Text_State = `text -label "No data" -align "left"`;
+								}
+
+							setParent ..;
+							
+						setParent ..;
+				
+						frameLayout -label "Settings" -collapsable true -backgroundShade true -marginHeight 7;
+
+							rowLayout -numberOfColumns 3 -columnWidth3 175 115 100 -columnAttach 1 "right" 40;
+
+								text -label "Time range :";
+								$MRS_FlexiInstancer_CounterTwistUI_RadioCollection_TimeRange = `radioCollection`;
+									$MRS_FlexiInstancer_CounterTwistUI_RadioButton_TimeSlider = `radioButton -label "Time Slider"`;
+									$MRS_FlexiInstancer_CounterTwistUI_RadioButton_StartEnd = `radioButton -label "Start/End" 
+										-onCommand ("disable -value false " + $rowLayout_startTime + "; disable -value false " + $rowLayout_endTime) 
+										-offCommand ("disable -value true " + $rowLayout_startTime + "; disable -value true " + $rowLayout_endTime)`;
+
+							setParent ..;
+							
+							rowLayout -numberOfColumns 3 -columnWidth3 175 115 100 -columnAttach 1 "right" 40 $rowLayout_startTime;
+
+								text -label "Start time :";
+								$MRS_FlexiInstancer_CounterTwistUI_FloatField_StartTime = `floatField -value $currentStartTime -precision 4 -step 10.0`;
+
+							setParent ..;
+
+							rowLayout -numberOfColumns 3 -columnWidth3 175 115 100 -columnAttach 1 "right" 40 $rowLayout_endTime;
+								
+								text -label "End time :";
+								$MRS_FlexiInstancer_CounterTwistUI_FloatField_EndTime = `floatField -value $currentEndTime -precision 4 -step 10.0`;
+
+							setParent ..;
+
+							columnLayout -adjustableColumn true -columnAttach "both" 50;
+
+								separator;
+							
+							setParent ..;
+
+							rowLayout -numberOfColumns 3 -columnWidth3 175 115 100 -columnAttach 1 "right" 40;
+								
+								text -label "Time step :";
+								$MRS_FlexiInstancer_CounterTwistUI_FloatField_TimeStep = `floatField -value $currentTimeStep -min 0.01 -precision 4 -step 1.0`;
+
+							setParent ..;
+						setParent ..;
+					setParent ..;
+				setParent ..;
+			setParent ..;
+		setParent ..;
+		
+		string $formLayout_bottomButtons = `formLayout -numberOfDivisions 3`;
+			string $button_cacheClose = `button -height 25 -label "Cache and Close"
+				-command ("MRS_FlexiInstancer_buildCounterTwistCache " + $shapeNodeName + "; deleteUI -window " + $MRS_FlexiInstancer_CounterTwistUI)`;
+			string $button_cache = `button -height 25 -label "Cache" 
+				-command ("MRS_FlexiInstancer_buildCounterTwistCache " + $shapeNodeName)`;
+			string $button_close = `button -height 25 -label "Close"
+				-command ("deleteUI -window " + $MRS_FlexiInstancer_CounterTwistUI)`;
+		
+		// Attach the buttons at the given offsets
+		formLayout -e
+			-attachPosition $button_cacheClose   "left"  0 0
+			-attachPosition $button_cacheClose   "right" 2 1
+			-attachPosition $button_cache        "left"  2 1
+			-attachPosition $button_cache        "right" 2 2
+			-attachPosition $button_close        "left"  2 2
+			-attachPosition $button_close        "right" 0 3
+			$formLayout_bottomButtons;
+		
+		// Attach the form layout at the given offsets
+		formLayout -e
+			-attachForm $formLayout_bottomButtons "left"   7
+			-attachForm $formLayout_bottomButtons "bottom" 7
+			-attachForm $formLayout_bottomButtons "right"  7
+			$formLayout_outerMain;
+			
+		setParent ..;
+
+		// Trick to get the top border back
+		string $tabLayout_topFix = `tabLayout -borderStyle "top" -tabsVisible false`;
+		formLayout -e
+			-attachForm $tabLayout_topFix "top"    0
+			-attachForm $tabLayout_topFix "left"   7
+			-attachForm $tabLayout_topFix "right"  7
+			$formLayout_outerMain;
+
+	// Edit initial control states
+	if ($currentTimeRangeIndex == 0)
+	{
+		radioCollection -e -select $MRS_FlexiInstancer_CounterTwistUI_RadioButton_TimeSlider $MRS_FlexiInstancer_CounterTwistUI_RadioCollection_TimeRange;
+		disable -value true $rowLayout_startTime;
+		disable -value true $rowLayout_endTime;
+	}
+	else if ($currentTimeRangeIndex == 1)
+	{
+		radioCollection -e -select $MRS_FlexiInstancer_CounterTwistUI_RadioButton_StartEnd $MRS_FlexiInstancer_CounterTwistUI_RadioCollection_TimeRange;
+		disable -value false $rowLayout_startTime;
+		disable -value false $rowLayout_endTime;
+	}
+
+	setFocus $MRS_FlexiInstancer_CounterTwistUI;
+	showWindow;
+}
+
+
+// ------ Counter Twist Window - Commands --------------------------------------------------------------------------------------------------------------------------------------
+
+//	Description
+// 	-----------
+//	Procedure deletes all keys which are used to store counter twist data for the given node
+global proc MRS_FlexiInstancer_deleteCounterTwistCache(string $shapeNodeName)
+{
+	// Global control names
+	global string $MRS_FlexiInstancer_CounterTwistUI;
+	global string $MRS_FlexiInstancer_CounterTwistUI_Text_State;
+
+	// Delete keys
+	cutKey -time ":" -attribute "counterTwist" $shapeNodeName;
+	// Reset the attribute
+	setAttr ($shapeNodeName + ".counterTwist") 0.0;
+
+	// Update window
+	if (`window -exists $MRS_FlexiInstancer_CounterTwistUI` && `window -q -docTag $MRS_FlexiInstancer_CounterTwistUI` == $shapeNodeName)
+	{
+		text -e -label "No data" $MRS_FlexiInstancer_CounterTwistUI_Text_State;
+	}
+}
+
+
+//	Description
+// 	-----------
+//	Procedure builds a cache in the form of a keyframed attribute, storing counter twist data for the given node
+// 	This procedure can be invoked from either the options window or the RMB callback popupMenu
+//	- If an options window exists and is associated with the given node, its settings will be used to provide input data to the build command
+//	- If no such window exists, values will instead be retrieved from optionVars
+global proc MRS_FlexiInstancer_buildCounterTwistCache(string $shapeNodeName)
+{
+	// Global optionVar names
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeRange;
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_StartTime;
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_EndTime;
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeStep;
+
+	// Global control names
+	global string $MRS_FlexiInstancer_CounterTwistUI;
+	global string $MRS_FlexiInstancer_CounterTwistUI_Text_State;
+	global string $MRS_FlexiInstancer_CounterTwistUI_RadioButton_TimeSlider;
+	global string $MRS_FlexiInstancer_CounterTwistUI_RadioButton_StartEnd;
+	global string $MRS_FlexiInstancer_CounterTwistUI_FloatField_StartTime;
+	global string $MRS_FlexiInstancer_CounterTwistUI_FloatField_EndTime;
+	global string $MRS_FlexiInstancer_CounterTwistUI_FloatField_TimeStep;
+
+	if (`window -exists $MRS_FlexiInstancer_CounterTwistUI` && `window -q -docTag $MRS_FlexiInstancer_CounterTwistUI` == $shapeNodeName)
+	{
+		// Retrieve values from window
+		float $startTime;
+		float $endTime;
+		float $timeStep = `floatField -q -value $MRS_FlexiInstancer_CounterTwistUI_FloatField_TimeStep`;
+
+		if (`radioButton -q -select $MRS_FlexiInstancer_CounterTwistUI_RadioButton_TimeSlider`)
+		{
+			$startTime = `playbackOptions -q -minTime`;
+			$endTime = `playbackOptions -q -maxTime`;
+		}
+		else
+		{
+			$startTime = `floatField -q -value $MRS_FlexiInstancer_CounterTwistUI_FloatField_StartTime`;
+			$endTime = `floatField -q -value $MRS_FlexiInstancer_CounterTwistUI_FloatField_EndTime`;
+		}
+		
+		// Build cache
+		FlexiInstancerCounterTwist -startTime $startTime -endTime $endTime -timeStep $timeStep $shapeNodeName;
+
+		// Update window
+		if (`keyframe -q -keyframeCount ($shapeNodeName + ".counterTwist")`)
+		{
+			text -e -label "Data exists" $MRS_FlexiInstancer_CounterTwistUI_Text_State;
+		}
+		else
+		{
+			text -e -label "No data" $MRS_FlexiInstancer_CounterTwistUI_Text_State;
+		}
+	}
+	else
+	{
+		// Ensure optionVars exist
+		MRS_FlexiInstancer_createCounterTwistUIDefaultSettings();
+
+		// Retrieve values from optionVars
+		int $timeRangeIndex = `optionVar -q $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeRange`;
+		float $timeStep = `optionVar -q $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeStep`;
+		float $startTime;
+		float $endTime;
+
+		if ($timeRangeIndex == 0)
+		{
+			$startTime = `playbackOptions -q -minTime`;
+			$endTime = `playbackOptions -q -maxTime`;
+		}
+		else
+		{
+			$startTime = `optionVar -q $MRS_FlexiInstancer_CounterTwistUI_OptionVar_StartTime`;
+			$endTime = `optionVar -q $MRS_FlexiInstancer_CounterTwistUI_OptionVar_EndTime`;
+		}
+
+		// Build cache
+		FlexiInstancerCounterTwist -startTime $startTime -endTime $endTime -timeStep $timeStep $shapeNodeName;
+	}
+}
+
+
+//	Description
+//	-----------
+//	Resets values on UI controls to the current values stored with the global optionVars
+//	Any other UI values will remain unchanged
+global proc MRS_FlexiInstancer_refreshCounterTwistUI()
+{
+	// Global optionVar names
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeRange;
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_StartTime;
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_EndTime;
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeStep;
+
+	// Global control names
+	global string $MRS_FlexiInstancer_CounterTwistUI_RadioCollection_TimeRange;
+	global string $MRS_FlexiInstancer_CounterTwistUI_RadioButton_TimeSlider;
+	global string $MRS_FlexiInstancer_CounterTwistUI_RadioButton_StartEnd;
+	global string $MRS_FlexiInstancer_CounterTwistUI_FloatField_StartTime;
+	global string $MRS_FlexiInstancer_CounterTwistUI_FloatField_EndTime;
+	global string $MRS_FlexiInstancer_CounterTwistUI_FloatField_TimeStep;
+
+	// Current values
+	int $currentTimeRangeIndex = `optionVar -q $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeRange`;
+	float $currentStartTime = `optionVar -q $MRS_FlexiInstancer_CounterTwistUI_OptionVar_StartTime`;
+	float $currentEndTime = `optionVar -q $MRS_FlexiInstancer_CounterTwistUI_OptionVar_EndTime`;
+	float $currentTimeStep = `optionVar -q $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeStep`;
+
+	if ($currentTimeRangeIndex == 0)
+	{
+		radioCollection -e -select $MRS_FlexiInstancer_CounterTwistUI_RadioButton_TimeSlider $MRS_FlexiInstancer_CounterTwistUI_RadioCollection_TimeRange;
+	}
+	else if ($currentTimeRangeIndex == 1)
+	{
+		radioCollection -e -select $MRS_FlexiInstancer_CounterTwistUI_RadioButton_StartEnd $MRS_FlexiInstancer_CounterTwistUI_RadioCollection_TimeRange;
+	}
+
+	floatField -e -value $currentStartTime $MRS_FlexiInstancer_CounterTwistUI_FloatField_StartTime;
+	floatField -e -value $currentEndTime $MRS_FlexiInstancer_CounterTwistUI_FloatField_EndTime;
+	floatField -e -value $currentTimeStep $MRS_FlexiInstancer_CounterTwistUI_FloatField_TimeStep;
+}
+
+
+//	Description
+//	-----------
+//	Sets up the global optionVar values for the UI
+global proc MRS_FlexiInstancer_createCounterTwistUIDefaultSettings()
+{
+	// Global optionVar names
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeRange;
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_StartTime;
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_EndTime;
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeStep;
+
+	// Global values
+	global int $MRS_FlexiInstancer_CounterTwistUI_Value_DefaultTimeRangeIndex;
+	global float $MRS_FlexiInstancer_CounterTwistUI_Value_DefaultStartTime;
+	global float $MRS_FlexiInstancer_CounterTwistUI_Value_DefaultEndTime;
+	global float $MRS_FlexiInstancer_CounterTwistUI_Value_DefaultTimeStep;
+
+	// Setup optionVars
+	if (!`optionVar -exists $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeRange`)
+	{
+		optionVar -intValue $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeRange $MRS_FlexiInstancer_CounterTwistUI_Value_DefaultTimeRangeIndex;
+	}
+
+	if (!`optionVar -exists $MRS_FlexiInstancer_CounterTwistUI_OptionVar_StartTime`)
+	{
+		optionVar -floatValue $MRS_FlexiInstancer_CounterTwistUI_OptionVar_StartTime $MRS_FlexiInstancer_CounterTwistUI_Value_DefaultStartTime;
+	}
+
+	if (!`optionVar -exists $MRS_FlexiInstancer_CounterTwistUI_OptionVar_EndTime`)
+	{
+		optionVar -floatValue $MRS_FlexiInstancer_CounterTwistUI_OptionVar_EndTime $MRS_FlexiInstancer_CounterTwistUI_Value_DefaultEndTime;
+	}
+
+	if (!`optionVar -exists $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeStep`)
+	{
+		optionVar -floatValue $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeStep $MRS_FlexiInstancer_CounterTwistUI_Value_DefaultTimeStep;
+	}
+}
+
+
+//	Description
+//	-----------
+//	Resets the global optionVar values to their defaults and updates the UI to reflect any changes
+global proc MRS_FlexiInstancer_resetCounterTwistUIDefaultSettings()
+{
+	// Global optionVar names
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeRange;
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_StartTime;
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_EndTime;
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeStep;
+
+	// Global values
+	global int $MRS_FlexiInstancer_CounterTwistUI_Value_DefaultTimeRangeIndex;
+	global float $MRS_FlexiInstancer_CounterTwistUI_Value_DefaultStartTime;
+	global float $MRS_FlexiInstancer_CounterTwistUI_Value_DefaultEndTime;
+	global float $MRS_FlexiInstancer_CounterTwistUI_Value_DefaultTimeStep;
+
+	// Set optionVars
+	optionVar -intValue $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeRange $MRS_FlexiInstancer_CounterTwistUI_Value_DefaultTimeRangeIndex;
+	optionVar -floatValue $MRS_FlexiInstancer_CounterTwistUI_OptionVar_StartTime $MRS_FlexiInstancer_CounterTwistUI_Value_DefaultStartTime;
+	optionVar -floatValue $MRS_FlexiInstancer_CounterTwistUI_OptionVar_EndTime $MRS_FlexiInstancer_CounterTwistUI_Value_DefaultEndTime;
+	optionVar -floatValue $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeStep $MRS_FlexiInstancer_CounterTwistUI_Value_DefaultTimeStep;
+
+	// Refresh the UI
+	MRS_FlexiInstancer_refreshCounterTwistUI();
+}
+
+
+global proc MRS_FlexiInstancer_saveCounterTwistUICustomSettings()
+{
+	// Global optionVar names
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeRange;
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_StartTime;
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_EndTime;
+	global string $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeStep;
+
+	// Global control names
+	global string $MRS_FlexiInstancer_CounterTwistUI_RadioButton_TimeSlider;
+	global string $MRS_FlexiInstancer_CounterTwistUI_RadioButton_StartEnd;
+	global string $MRS_FlexiInstancer_CounterTwistUI_FloatField_StartTime;
+	global string $MRS_FlexiInstancer_CounterTwistUI_FloatField_EndTime;
+	global string $MRS_FlexiInstancer_CounterTwistUI_FloatField_TimeStep;
+
+	// Current control values
+	int $currentTimeRangeIndex;
+	if (`radioButton -q -select $MRS_FlexiInstancer_CounterTwistUI_RadioButton_TimeSlider`)
+	{
+		$currentTimeRangeIndex = 0;
+	}
+	else
+	{
+		$currentTimeRangeIndex = 1;
+	}
+	float $currentStartTime = `floatField -q -value $MRS_FlexiInstancer_CounterTwistUI_FloatField_StartTime`;
+	float $currentEndTime = `floatField -q -value $MRS_FlexiInstancer_CounterTwistUI_FloatField_EndTime`;
+	float $currentTimeStep = `floatField -q -value $MRS_FlexiInstancer_CounterTwistUI_FloatField_TimeStep`;
+
+	// Set optionVars
+	optionVar -intValue $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeRange $currentTimeRangeIndex;
+	optionVar -floatValue $MRS_FlexiInstancer_CounterTwistUI_OptionVar_StartTime $currentStartTime;
+	optionVar -floatValue $MRS_FlexiInstancer_CounterTwistUI_OptionVar_EndTime $currentEndTime;
+	optionVar -floatValue $MRS_FlexiInstancer_CounterTwistUI_OptionVar_TimeStep $currentTimeStep;
+}

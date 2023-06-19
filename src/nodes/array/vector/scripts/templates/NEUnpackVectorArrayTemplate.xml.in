@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+	<using package='maya'/>
+	<template name='NE${NODE_NAME_PREFIX}UnpackVectorArray'>
+		<attribute name='message' type='maya.message'>
+			<label>Message</label>
+		</attribute>
+		<attribute name='output' type='maya.double3'>
+			<label>Output</label>
+		</attribute>
+		<attribute name='input' type='maya.vectorArray'>
+			<label>Input</label>
+		</attribute>
+	</template>
+	<view name='NEDefault' template='NE${NODE_NAME_PREFIX}UnpackVectorArray'>
+		<property name='message'/>
+		<property name='output'/>
+		<property name='input'/>
+	</view>
+</templates>

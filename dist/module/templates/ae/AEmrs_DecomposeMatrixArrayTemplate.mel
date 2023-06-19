@@ -1,0 +1,20 @@
+// ------ AE Template ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc AEmrs_DecomposeMatrixArrayTemplate( string $nodeName )
+{
+	editorTemplate -beginScrollLayout;
+
+    // Default controls
+    AEdependNodeTemplate $nodeName;
+    editorTemplate -addExtraControls;
+
+    // Suppress controls
+    editorTemplate -suppress "input";
+    editorTemplate -suppress "rotationOrder";
+    editorTemplate -suppress "outputTranslation";
+    editorTemplate -suppress "outputRotation";
+    editorTemplate -suppress "outputScale";
+    editorTemplate -suppress "outputQuaternion";
+
+    editorTemplate -endScrollLayout;
+}

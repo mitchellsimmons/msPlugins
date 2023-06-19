@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+	<using package='maya'/>
+	<template name='NE${NODE_NAME_PREFIX}LimitVector'>
+		<attribute name='message' type='maya.message'>
+			<label>Message</label>
+		</attribute>
+		<attribute name='output' type='maya.double3'>
+			<label>Output</label>
+		</attribute>
+		<attribute name='input' type='maya.double3'>
+			<label>Input</label>
+		</attribute>
+		<attribute name='minLength' type='maya.double'>
+			<label>Min Length</label>
+		</attribute>
+		<attribute name='maxLength' type='maya.double'>
+			<label>Max Length</label>
+		</attribute>
+	</template>
+	<view name='NEDefault' template='NE${NODE_NAME_PREFIX}LimitVector'>
+		<property name='message'/>
+		<property name='output'/>
+		<property name='input'/>
+		<property name='minLength'/>
+		<property name='maxLength'/>
+	</view>
+</templates>

@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+	<using package='maya'/>
+	<template name='NE${NODE_NAME_PREFIX}NormalizeWeightArray'>
+		<attribute name='message' type='maya.message'>
+			<label>Message</label>
+		</attribute>
+		<attribute name='output' type='maya.doubleArray'>
+			<label>Output</label>
+		</attribute>
+		<attribute name='input' type='maya.doubleArray'>
+			<label>Input</label>
+		</attribute>
+	</template>
+	<view name='NEDefault' template='NE${NODE_NAME_PREFIX}NormalizeWeightArray'>
+		<property name='message'/>
+		<property name='output'/>
+		<property name='input'/>
+	</view>
+</templates>

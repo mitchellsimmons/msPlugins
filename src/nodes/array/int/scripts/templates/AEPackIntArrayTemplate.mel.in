@@ -1,0 +1,67 @@
+// ------ AE Template ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc AE${NODE_NAME_PREFIX}PackIntArrayTemplate( string $nodeName )
+{
+    string $annotation;
+
+    editorTemplate -beginScrollLayout;
+
+    editorTemplate -beginLayout "General" -collapse 0;
+
+        MRS_AEspacer();
+        
+        $annotation = "Defines how the array is filled. If true, the output array will emulate logical contiguity by assigning the fill value to any sparse element.";
+        editorTemplate -label "Fill Logically" -annotation $annotation -addControl "fillLogically";
+
+        MRS_AEspacer();
+
+        $annotation = "Defines the size of the output array. If the size is larger than the number of inputs, the array will be filled using the fill value.";
+        editorTemplate -label "Size" -annotation $annotation -addControl "size";
+
+        MRS_AEspacer();
+
+        $annotation = "Defines the value which is used to fill the output array if the value of the size attribute is smaller than the number of inputs.";
+        editorTemplate -label "Fill" -annotation $annotation -addControl "fill";
+
+        MRS_AEspacer();
+
+        editorTemplate -callCustom "MRS_PackIntArray_input_AEnew" "MRS_PackIntArray_input_AEreplace" "input";
+
+        MRS_AEspacer();
+
+    editorTemplate -endLayout;
+
+    // Defaults
+    AEdependNodeTemplate $nodeName;
+    editorTemplate -addExtraControls;
+
+    editorTemplate -endScrollLayout;
+}
+
+
+// ------ Input ------------------------------------------------------------------------------------------------------------------------------------------------
+
+//  Description
+//  -----------
+//  This procedure creates a custom layout/controls for the "input" attribute
+//  It will produce a single global variable which holds the name of the outermost frameLayout which can be used to retrieve child controls
+global proc MRS_PackIntArray_input_AEnew(string $inputNodeAttrName)
+{
+    // Global names
+    global string $MRS_PackIntArray_AE_frameLayout_input;
+
+    string $annotation = "Defines the input values used to build the output array.";
+    $MRS_PackIntArray_AE_frameLayout_input = MRS_AEnewPrimitiveArray($inputNodeAttrName, $annotation);
+}
+
+
+//  Description
+//  -----------
+//  This procedure updates the custom layout/controls that have been created for the "input" attribute
+global proc MRS_PackIntArray_input_AEreplace(string $inputNodeAttrName)
+{
+    // Global values
+    global string $MRS_PackIntArray_AE_frameLayout_input;
+
+    MRS_AEreplacePrimitiveArray($inputNodeAttrName, $MRS_PackIntArray_AE_frameLayout_input);
+}

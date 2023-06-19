@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+	<using package='maya'/>
+	<using package='std'/>
+	<template name='NE${NODE_NAME_PREFIX}Sin'>
+		<attribute name='message' type='maya.message'>
+			<label>Message</label>
+		</attribute>
+		<attribute name='output' type='maya.double'>
+			<label>Output</label>
+		</attribute>
+		<attribute name='input' type='maya.doubleAngle'>
+			<label>Input</label>
+		</attribute>
+	</template>
+	<view name='NEDefault' template='NE${NODE_NAME_PREFIX}Sin'>
+		<property name='message'/>
+		<property name='output'/>
+		<property name='input'/>
+	</view>
+</templates>

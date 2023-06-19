@@ -1,0 +1,27 @@
+// ------ AE Template ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc AE${NODE_NAME_PREFIX}SelectVectorArrayTemplate( string $nodeName )
+{
+    editorTemplate -beginScrollLayout;
+
+    editorTemplate -beginLayout "Inputs" -collapse 0;
+
+        MRS_AEspacer();
+        
+        editorTemplate -label "Condition" -addControl "condition";
+
+        MRS_AEspacer();
+
+    editorTemplate -endLayout;
+
+    // Defaults
+    AEdependNodeTemplate $nodeName;
+    editorTemplate -addExtraControls;
+
+    // Suppress controls
+    editorTemplate -suppress "ifFalse";
+    editorTemplate -suppress "ifTrue";
+    editorTemplate -suppress "output";
+
+    editorTemplate -endScrollLayout;
+}

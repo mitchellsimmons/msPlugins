@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+	<using package='maya'/>
+	<template name='NE${NODE_NAME_PREFIX}RemapInt'>
+		<attribute name='message' type='maya.message'>
+			<label>Message</label>
+		</attribute>
+		<attribute name='output' type='maya.long'>
+			<label>Output</label>
+		</attribute>
+		<attribute name='input' type='maya.long'>
+			<label>Input</label>
+		</attribute>
+		<attribute name='low1' type='maya.long'>
+			<label>Low 1</label>
+		</attribute>
+		<attribute name='high1' type='maya.long'>
+			<label>High 1</label>
+		</attribute>
+		<attribute name='low2' type='maya.long'>
+			<label>Low 2</label>
+		</attribute>
+		<attribute name='high2' type='maya.long'>
+			<label>High 2</label>
+		</attribute>
+	</template>
+	<view name='NEDefault' template='NE${NODE_NAME_PREFIX}RemapInt'>
+		<property name='message'/>
+		<property name='output'/>
+		<property name='input'/>
+		<property name='low1'/>
+		<property name='high1'/>
+		<property name='low2'/>
+		<property name='high2'/>
+	</view>
+</templates>

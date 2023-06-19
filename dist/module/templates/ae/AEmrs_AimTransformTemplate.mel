@@ -1,0 +1,54 @@
+// ------ AE Template ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc AEmrs_AimTransformTemplate( string $nodeName )
+{
+    string $annotation;
+
+    editorTemplate -beginScrollLayout;
+
+    editorTemplate -beginLayout "Inputs" -collapse 0;
+
+        MRS_AEspacer();
+
+        $annotation = "Defines the axis that will point towards the position defined by the \"aimPosition\" attribute. The aim-axis takes preference over the up-axis if the same axis is selected for both.";
+        editorTemplate -label "Aim Axis" -annotation $annotation -addControl "aimAxis";
+
+        MRS_AEspacer();
+
+        $annotation = "Defines the axis that will point towards the position defined by the \"upPosition\" attribute. The aim-axis takes preference over the up-axis if the same axis is selected for both.";
+        editorTemplate -label "Up Axis" -annotation $annotation -addControl "upAxis";
+
+		MRS_AEspacer();
+
+		$annotation = "Specifies the world position that this transform should inherit.";
+        editorTemplate -label "Root Position" -annotation $annotation -addControl "rootPosition";
+
+		MRS_AEspacer();
+
+		$annotation = "Specifies the world position that this transform's aimAxis should aim towards.";
+        editorTemplate -label "Aim Position" -annotation $annotation -addControl "aimPosition";
+
+        MRS_AEspacer();
+
+		$annotation = "Specifies the world position that this transform's upAxis should attempt to aim towards.";
+        editorTemplate -label "Up Position" -annotation $annotation -addControl "upPosition";
+
+        MRS_AEspacer();
+
+		$annotation = "The world inverse frame of this node's parent transform.";
+        editorTemplate -label "Parent Inverse Frame" -annotation $annotation -addControl "parentInverseFrame";
+
+        MRS_AEspacer();
+
+    editorTemplate -endLayout;
+
+    // This node is derived from a transform, therefore we add its template logic after ours
+    // This is copied from AEtransformTemplate.mel
+    AEtransformMain $nodeName;
+    AEtransformNoScroll $nodeName;
+
+    // Add extra controls last
+    editorTemplate -addExtraControls;
+
+    editorTemplate -endScrollLayout;
+}

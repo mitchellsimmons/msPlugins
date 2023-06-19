@@ -1,0 +1,10 @@
+# pkg-config file for seexpr2
+prefix=C:/Users/mitch/Downloads/SeExpr-master - Copy/SeExpr/-optimize
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: seexpr2
+Description: SeExpr v2 Library
+Version: 1.0.0
+Cflags: -I${includedir}
+Libs: -L${libdir}

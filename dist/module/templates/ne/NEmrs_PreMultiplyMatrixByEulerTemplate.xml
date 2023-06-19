@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+	<using package='maya'/>
+	<template name='NEmrs_PreMultiplyMatrixByEuler'>
+		<attribute name='message' type='maya.message'>
+			<label>Message</label>
+		</attribute>
+		<attribute name='output' type='maya.matrix'>
+			<label>Output</label>
+		</attribute>
+		<attribute name='rotation' type='maya.double3'>
+			<label>Rotation</label>
+		</attribute>
+		<attribute name='rotationOrder' type='maya.enum'>
+			<label>Rotation Order</label>
+		</attribute>
+		<attribute name='input' type='maya.matrix'>
+			<label>Input</label>
+		</attribute>
+	</template>
+	<view name='NEDefault' template='NEmrs_PreMultiplyMatrixByEuler'>
+		<property name='message'/>
+		<property name='output'/>
+		<property name='rotation'/>
+		<property name='rotationOrder'/>
+		<property name='input'/>
+	</view>
+</templates>

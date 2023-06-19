@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+  <using package='maya'/>
+  <using package='std'/>
+  <template name='NEmrs_ArithmeticSequenceAngleArray'>
+    <attribute name='message' type='maya.message'>
+      <label>Message</label>
+    </attribute>
+    <attribute name='outputSequence' type='maya.mrs_AngleArray'>
+      <label>Output Sequence</label>
+    </attribute>
+    <attribute name='size' type='maya.long'>
+      <label>Size</label>
+    </attribute>
+    <attribute name='firstTerm' type='maya.doubleAngle'>
+      <label>First Term</label>
+    </attribute>
+    <attribute name='commonDifference' type='maya.doubleAngle'>
+      <label>Common Difference</label>
+    </attribute>
+  </template>
+  <view name='NEDefault' template='NEmrs_ArithmeticSequenceAngleArray'>
+    <property name='message'/>
+    <property name='outputSequence'/>
+    <property name='size'/>
+    <property name='firstTerm'/>
+    <property name='commonDifference'/>
+  </view>
+</templates>

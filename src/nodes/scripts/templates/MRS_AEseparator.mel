@@ -1,0 +1,40 @@
+// ------ AE Customisations ------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc MRS_AEseparator()
+{
+    editorTemplate -callCustom "MRS_separator_AEnew" "MRS_separator_AEreplace";
+}
+
+// ------ Layout Customisations ------------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc MRS_separator_AEnew()
+{
+    if (`uiTemplate -exists MRS_separatorTemplate`)
+    {
+        deleteUI -uiTemplate MRS_separatorTemplate;
+    }
+
+    uiTemplate MRS_separatorTemplate;
+
+    // Prevents Maya from formatting the rowLayout using AE settings
+    setUITemplate -pushTemplate MRS_separatorTemplate;
+
+        rowLayout -adj 1 -rowAttach 1 "both" 2;
+
+            // Ensure the separator uses the default AE style
+            setUITemplate -pushTemplate attributeEditorTemplate;
+
+                separator;
+
+            setUITemplate -popTemplate;
+
+        setParent ..;
+
+    setUITemplate -popTemplate;
+}
+
+
+global proc MRS_separator_AEreplace()
+{
+    // No-op
+}

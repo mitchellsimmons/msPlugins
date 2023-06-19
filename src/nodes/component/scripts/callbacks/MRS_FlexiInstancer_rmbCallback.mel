@@ -1,0 +1,664 @@
+source "MRS_FlexiInstancer_counterTwistUI";
+source "MRS_FlexiInstancer_contextTools";
+
+// ------ Notes ---------------------------------------------------------------------------------------------------------------------------------------------
+
+//	The menu paths used below may change in future versions of Maya, however they can be retrieved as follows:
+//	- Turn on echo all commands in the script editor and right click on a dag object in each of the viewport panes
+//	- Copy the paths passed to the "buildObjectMenuItemsNow" command
+
+// 	Maya's marking menus can have the following formats:
+// 	- Default viewort panel, index = [1-4], RMB event :			MainPane|viewPanes|modelPanel<i>|modelPanel<i>|modelEditorTabLayout|modelPanel<i>|modelPanel<i>ObjectPop 
+// 	- Default viewort panel, index = [1-4], ctrl+RMB event :	MainPane|viewPanes|modelPanel<i>|modelPanel<i>|modelEditorTabLayout|modelPanel<i>|modelPanel<i>ConvertPop
+// 	- Tear off panel, index > 4, RMB event :					modelPanel<i>Window|modelPanel<i>|modelPanel<i>|modelEditorTabLayout|modelPanel<i>|modelPanel<i>ObjectPop
+// 	- Tear off panel, index > 4, ctrl+RMB event :				modelPanel<i>Window|modelPanel<i>|modelPanel<i>|modelEditorTabLayout|modelPanel<i>|modelPanel<i>ConvertPop
+
+// 	The following scripts provide useful information on how Maya generates its marking menus internally
+//	- <drive>:\Program Files\Autodesk\Maya<version>\scripts\others\buildObjectMenuItemsNow.mel
+//	- <drive>:\Program Files\Autodesk\Maya<version>\scripts\others\dagMenuProc.mel
+
+// The following naming convention is used for global variables
+// - <prefix>_<general descriptor>_<ui descriptor>_<type>_<type descriptor>
+// The following naming convention is used for global procs (most procs are global to allow forward referencing, ie. less confusing layout)
+// - <prefix>_<general descriptor>_<proc descriptor>
+// - The proc descriptor uses lowerCamelCasing to help to distinguish from global vars which use all UpperCamelCasing
+
+// ------ Entry Point ------------------------------------------------------------------------------------------------------------------------------------------------
+
+//	Description
+//	-----------
+//	This procedure is invoked by our RMB callback, which is owned by our FlexiInstancer plugin
+//	It modifies Maya's default marking menu when a RMB event occurs over FlexiInstancer or one of its associated manipulators
+//	It is passed a single argument representing the name of the object the RMB event occured over or the last selected item if nothing is under the cursor
+global proc MRS_FlexiInstancer_rmbCallback(string $nodeName)
+{
+	global string $MRS_FlexiInstancerType;
+	global string $MRS_FlexiInstancer_ScaleAdjustmentUI_WorkspaceControl;
+	global string $MRS_FlexiInstancer_TwistAdjustmentUI_WorkspaceControl;
+	global string $MRS_FlexiInstancer_PositionAdjustmentUI_WorkspaceControl;
+
+	// If the context is active we first want to check if the mouse is hovered over a manipulator
+	// It is possible the mouse is hovered over a manipulator but the node under the cursor is not a FlexiInstancer object
+	// - Maya calls the "dagObjectHit" command from the "buildObjectMenuItemsNow.mel" script and this is what determines which object will be passed to our callback
+	// - The active context and the manipulators have no effect on the result of this command so we must prioritise these checks below
+	string $currentContext = `currentCtx`;
+
+	if ($currentContext == "FlexiInstancerUpVectorContext1")
+	{
+		// The following command will return the name of the plug associated with the manipulator that is currently under the mouse
+		// If no manipulator is under the mouse, an empty string will be returned
+		string $manipNodePlugName = `FlexiInstancerUpVectorContext -q -hoverManipPlug "FlexiInstancerUpVectorContext1"`;
+		if (size($manipNodePlugName))
+		{
+			MRS_FlexiInstancer_createUpVectorManipMenu($manipNodePlugName);
+
+			// This is an additional fix for our setup
+			// Maya will visually select a manipulator that has been right clicked
+			// Our setup tracks which manipulator is visually active within the active context
+			// The below command will signal to our tracking system that the associated manipulator should be set active
+			FlexiInstancerUpVectorContext -e -activeManipPlug $manipNodePlugName "FlexiInstancerUpVectorContext1";
+			return;
+		}
+	}
+	else if ($currentContext == "FlexiInstancerScaleAdjustmentContext1")
+	{
+		string $manipNodePlugName = `FlexiInstancerScaleAdjustmentContext -q -hoverManipPlug "FlexiInstancerScaleAdjustmentContext1"`;
+		if (size($manipNodePlugName))
+		{
+			MRS_FlexiInstancer_createScaleAdjustmentManipMenu($manipNodePlugName);
+
+			FlexiInstancerScaleAdjustmentContext -e -activeManipPlug $manipNodePlugName "FlexiInstancerScaleAdjustmentContext1";
+
+			if (`workspaceControl -q -exists $MRS_FlexiInstancer_ScaleAdjustmentUI_WorkspaceControl` &&
+				`workspaceControl -q -visible $MRS_FlexiInstancer_ScaleAdjustmentUI_WorkspaceControl`)
+			{
+				int $isCollapsed = `workspaceControl -q -collapse $MRS_FlexiInstancer_ScaleAdjustmentUI_WorkspaceControl`;
+				MRS_FlexiInstancer_scaleAdjustmentUINew($manipNodePlugName);
+				workspaceControl -e -collapse $isCollapsed $MRS_FlexiInstancer_ScaleAdjustmentUI_WorkspaceControl;
+			}
+
+			return;
+		}
+	}
+	else if ($currentContext == "FlexiInstancerTwistAdjustmentContext1")
+	{
+		string $manipNodePlugName = `FlexiInstancerTwistAdjustmentContext -q -hoverManipPlug "FlexiInstancerTwistAdjustmentContext1"`;
+		if (size($manipNodePlugName))
+		{
+			MRS_FlexiInstancer_createTwistAdjustmentManipMenu($manipNodePlugName);
+
+			FlexiInstancerTwistAdjustmentContext -e -activeManipPlug $manipNodePlugName "FlexiInstancerTwistAdjustmentContext1";
+
+			if (`workspaceControl -q -exists $MRS_FlexiInstancer_TwistAdjustmentUI_WorkspaceControl` &&
+				`workspaceControl -q -visible $MRS_FlexiInstancer_TwistAdjustmentUI_WorkspaceControl`)
+			{
+				int $isCollapsed = `workspaceControl -q -collapse $MRS_FlexiInstancer_TwistAdjustmentUI_WorkspaceControl`;
+				MRS_FlexiInstancer_twistAdjustmentUINew($manipNodePlugName);
+				workspaceControl -e -collapse $isCollapsed $MRS_FlexiInstancer_TwistAdjustmentUI_WorkspaceControl;
+			}
+
+			return;
+		}
+	}
+	else if ($currentContext == "FlexiInstancerPositionAdjustmentContext1")
+	{
+		string $manipNodePlugName = `FlexiInstancerPositionAdjustmentContext -q -hoverManipPlug "FlexiInstancerPositionAdjustmentContext1"`;
+		if (size($manipNodePlugName))
+		{
+			MRS_FlexiInstancer_createPositionAdjustmentManipMenu($manipNodePlugName);
+
+			FlexiInstancerPositionAdjustmentContext -e -activeManipPlug $manipNodePlugName "FlexiInstancerPositionAdjustmentContext1";
+
+			if (`workspaceControl -q -exists $MRS_FlexiInstancer_PositionAdjustmentUI_WorkspaceControl` &&
+				`workspaceControl -q -visible $MRS_FlexiInstancer_PositionAdjustmentUI_WorkspaceControl`)
+			{
+				int $isCollapsed = `workspaceControl -q -collapse $MRS_FlexiInstancer_PositionAdjustmentUI_WorkspaceControl`;
+				MRS_FlexiInstancer_positionAdjustmentUINew($manipNodePlugName);
+				workspaceControl -e -collapse $isCollapsed $MRS_FlexiInstancer_PositionAdjustmentUI_WorkspaceControl;
+			}
+
+			return;
+		}
+	}
+	
+	if (`nodeType $nodeName` == $MRS_FlexiInstancerType)
+	{
+		// Provide a consistent input for menu functions
+		string $parents[] = `listRelatives -parent $nodeName`;
+		MRS_FlexiInstancer_createMainMenu($parents[0]);
+	}
+	else
+	{
+		string $shapes[] = `listRelatives -shapes -type $MRS_FlexiInstancerType $nodeName`;
+		if (size($shapes))
+		{
+			MRS_FlexiInstancer_createMainMenu($nodeName);
+		}
+	}
+}
+
+// ------ Popup Menus - Build/Delete ---------------------------------------------------------------------------------------------------------------------------------------
+
+//	Description
+//	-----------
+//	This procedure deletes menuItems from the currently parented marking menu then appends our own custom items
+//	Provides custom commands for FlexiInstancer nodes
+global proc MRS_FlexiInstancer_createMainMenu(string $nodeName)
+{
+	// Global control names
+	global string $MRS_FlexiInstancer_Popup_MenuItem_UpVectorTool;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_ToggleUpVectorTool;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_DebugUpVector;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_RemoveFromUpVectorTool;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_AddToUpVectorTool;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_CounterTwistTool;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_CounterTwistOptions;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_DeleteCounterTwistCache;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_BuildCounterTwistCache;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_AdjustmentTools;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_ScaleAdjustmentTool;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_ToggleScaleAdjustmentTool;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_RemoveFromScaleAdjustmentTool;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_AddToScaleAdjustmentTool;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_TwistAdjustmentTool;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_ToggleTwistAdjustmentTool;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_RemoveFromTwistAdjustmentTool;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_AddToTwistAdjustmentTool;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_PositionAdjustmentTool;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_TogglePositionAdjustmentTool;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_RemoveFromPositionAdjustmentTool;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_AddToPositionAdjustmentTool;
+
+	// Get the shape node
+	string $shapes[] = `listRelatives -shapes $nodeName`;
+	string $shapeNodeName = $shapes[0];
+
+	// Get the current parent menu, possible formats are listed in the above notes
+	string $parent = `setParent -q -menu`;
+
+	// Return early if the event was ctrl+RMB, we will just let Maya display its default menu
+	if (endsWith($parent, "ConvertPop")) { return; }
+
+	// Clean up our custom menuItems from previous calls, they may be parented to the current or a different menu
+	MRS_FlexiInstancer_deleteMainMenuItems();
+
+	// Get the current panel (-withFocus should also work)
+	string $currentPanel = `getPanel -underPointer`;
+
+	// Ensure the event occurred over a model panel
+	if (`getPanel -typeOf $currentPanel` == "modelPanel")
+	{
+		// Delete Maya's default menu items which it creates using the scripts listed in the above notes
+		popupMenu -e -deleteAllItems $parent;
+
+		$MRS_FlexiInstancer_Popup_MenuItem_AdjustmentTools = `menuItem
+			-label "Adjustment Tools"
+			-subMenu true
+			-radialPosition "N"`;
+
+			$MRS_FlexiInstancer_Popup_MenuItem_ScaleAdjustmentTool = `menuItem
+				-label "Adjust Scale"
+				-subMenu true
+				-radialPosition "W"`;
+
+				$MRS_FlexiInstancer_Popup_MenuItem_ToggleScaleAdjustmentTool = `menuItem
+					-label "Toggle On/Off"
+					-command ("MRS_FlexiInstancer_toggleScaleAdjustmentTool " + $nodeName)
+					-radialPosition "N" 
+					-enableCommandRepeat 1`;
+
+				$MRS_FlexiInstancer_Popup_MenuItem_RemoveFromScaleAdjustmentTool = `menuItem
+					-label "Remove"
+					-command ("MRS_FlexiInstancer_removeFromScaleAdjustmentTool " + $nodeName)
+					-radialPosition "W" 
+					-enableCommandRepeat 1`;
+
+				$MRS_FlexiInstancer_Popup_MenuItem_AddToScaleAdjustmentTool = `menuItem
+					-label "Add"
+					-command ("MRS_FlexiInstancer_addToScaleAdjustmentTool " + $nodeName)
+					-radialPosition "E" 
+					-enableCommandRepeat 1`;
+
+			setParent -m $MRS_FlexiInstancer_Popup_MenuItem_AdjustmentTools;
+
+			$MRS_FlexiInstancer_Popup_MenuItem_TwistAdjustmentTool = `menuItem
+				-label "Adjust Twist"
+				-subMenu true
+				-radialPosition "E"`;
+
+				$MRS_FlexiInstancer_Popup_MenuItem_ToggleTwistAdjustmentTool = `menuItem
+					-label "Toggle On/Off"
+					-command ("MRS_FlexiInstancer_toggleTwistAdjustmentTool " + $nodeName)
+					-radialPosition "N" 
+					-enableCommandRepeat 1`;
+
+				$MRS_FlexiInstancer_Popup_MenuItem_RemoveFromTwistAdjustmentTool = `menuItem
+					-label "Remove"
+					-command ("MRS_FlexiInstancer_removeFromTwistAdjustmentTool " + $nodeName)
+					-radialPosition "W" 
+					-enableCommandRepeat 1`;
+
+				$MRS_FlexiInstancer_Popup_MenuItem_AddToTwistAdjustmentTool = `menuItem
+					-label "Add"
+					-command ("MRS_FlexiInstancer_addToTwistAdjustmentTool " + $nodeName)
+					-radialPosition "E" 
+					-enableCommandRepeat 1`;
+
+			setParent -m $MRS_FlexiInstancer_Popup_MenuItem_AdjustmentTools;
+
+			$MRS_FlexiInstancer_Popup_MenuItem_PositionAdjustmentTool = `menuItem
+				-label "Adjust Position"
+				-subMenu true
+				-radialPosition "N"`;
+
+				$MRS_FlexiInstancer_Popup_MenuItem_TogglePositionAdjustmentTool = `menuItem
+					-label "Toggle On/Off"
+					-command ("MRS_FlexiInstancer_togglePositionAdjustmentTool " + $nodeName)
+					-radialPosition "N" 
+					-enableCommandRepeat 1`;
+
+				$MRS_FlexiInstancer_Popup_MenuItem_RemoveFromPositionAdjustmentTool = `menuItem
+					-label "Remove"
+					-command ("MRS_FlexiInstancer_removeFromPositionAdjustmentTool " + $nodeName)
+					-radialPosition "W" 
+					-enableCommandRepeat 1`;
+
+				$MRS_FlexiInstancer_Popup_MenuItem_AddToPositionAdjustmentTool = `menuItem
+					-label "Add"
+					-command ("MRS_FlexiInstancer_addToPositionAdjustmentTool " + $nodeName)
+					-radialPosition "E" 
+					-enableCommandRepeat 1`;
+
+		setParent -m $parent;
+
+		$MRS_FlexiInstancer_Popup_MenuItem_UpVectorTool = `menuItem
+			-label "Baking Tool"
+			-command ("MRS_FlexiInstancer_instanceBakingUI " + $shapeNodeName)
+			-radialPosition "S"
+			-enableCommandRepeat 1`;
+
+		setParent -m $parent;
+
+		$MRS_FlexiInstancer_Popup_MenuItem_UpVectorTool = `menuItem
+			-label "Up Vector Tool"
+			-subMenu true
+			-radialPosition "W"`;
+
+			$MRS_FlexiInstancer_Popup_MenuItem_ToggleUpVectorTool = `menuItem
+				-label "Toggle On/Off"
+				-command ("MRS_FlexiInstancer_toggleUpVectorTool " + $nodeName)
+				-radialPosition "N" 
+				-enableCommandRepeat 1`;
+
+			$MRS_FlexiInstancer_Popup_MenuItem_DebugUpVector = `menuItem
+				-label "Debug"
+				-command ("MRS_FlexiInstancer_debugUpVectorUI " + $shapeNodeName)
+				-radialPosition "S" 
+				-enableCommandRepeat 1`;
+
+			$MRS_FlexiInstancer_Popup_MenuItem_RemoveFromUpVectorTool = `menuItem
+				-label "Remove"
+				-command ("MRS_FlexiInstancer_removeFromUpVectorTool " + $nodeName)
+				-radialPosition "W" 
+				-enableCommandRepeat 1`;
+	
+			$MRS_FlexiInstancer_Popup_MenuItem_AddToUpVectorTool = `menuItem
+				-label "Add"
+				-command ("MRS_FlexiInstancer_addToUpVectorTool " + $nodeName)
+				-radialPosition "E" 
+				-enableCommandRepeat 1`;
+
+		setParent -m $parent;
+
+		$MRS_FlexiInstancer_Popup_MenuItem_CounterTwistTool = `menuItem
+			-label "Counter Twist Tool"
+			-subMenu true
+			-radialPosition "E"`;
+
+			$MRS_FlexiInstancer_Popup_MenuItem_CounterTwistOptions = `menuItem
+				-label "Options"
+				-command ("MRS_FlexiInstancer_counterTwistUI " + $shapeNodeName)
+				-radialPosition "N"
+				-enableCommandRepeat 1`;
+
+			$MRS_FlexiInstancer_Popup_MenuItem_DeleteCounterTwistCache = `menuItem
+				-label "Delete Cache"
+				-command ("MRS_FlexiInstancer_deleteCounterTwistCache " + $shapeNodeName)
+				-radialPosition "W"
+				-enableCommandRepeat 1`;
+
+			$MRS_FlexiInstancer_Popup_MenuItem_BuildCounterTwistCache = `menuItem
+				-label "Build Cache"
+				-command ("MRS_FlexiInstancer_buildCounterTwistCache " + $shapeNodeName)
+				-radialPosition "E"
+				-enableCommandRepeat 1`;
+
+		setParent -m $parent;
+	}
+	else
+	{
+		warning("FlexiInstancer: Unexpected behaviour, RMB event occurred over non model panel : " + $currentPanel);
+	}
+}
+
+
+//	Description
+//	-----------
+// 	Deletes menuItems from the above menu
+global proc MRS_FlexiInstancer_deleteMainMenuItems()
+{
+	// Global control names
+	global string $MRS_FlexiInstancer_Popup_MenuItem_UpVectorTool;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_ToggleUpVectorTool;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_DebugUpVector;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_RemoveFromUpVectorTool;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_AddToUpVectorTool;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_CounterTwistTool;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_CounterTwistOptions;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_DeleteCounterTwistCache;
+	global string $MRS_FlexiInstancer_Popup_MenuItem_BuildCounterTwistCache;
+
+	if (`menuItem -e -exists $MRS_FlexiInstancer_Popup_MenuItem_UpVectorTool`) { deleteUI -menuItem $MRS_FlexiInstancer_Popup_MenuItem_UpVectorTool; }
+	if (`menuItem -e -exists $MRS_FlexiInstancer_Popup_MenuItem_ToggleUpVectorTool`) { deleteUI -menuItem $MRS_FlexiInstancer_Popup_MenuItem_ToggleUpVectorTool; }
+	if (`menuItem -e -exists $MRS_FlexiInstancer_Popup_MenuItem_DebugUpVector`) { deleteUI -menuItem $MRS_FlexiInstancer_Popup_MenuItem_DebugUpVector; }
+	if (`menuItem -e -exists $MRS_FlexiInstancer_Popup_MenuItem_RemoveFromUpVectorTool`) { deleteUI -menuItem $MRS_FlexiInstancer_Popup_MenuItem_RemoveFromUpVectorTool; }
+	if (`menuItem -e -exists $MRS_FlexiInstancer_Popup_MenuItem_AddToUpVectorTool`) { deleteUI -menuItem $MRS_FlexiInstancer_Popup_MenuItem_AddToUpVectorTool; }
+	if (`menuItem -e -exists $MRS_FlexiInstancer_Popup_MenuItem_CounterTwistTool`) { deleteUI -menuItem $MRS_FlexiInstancer_Popup_MenuItem_CounterTwistTool; }
+	if (`menuItem -e -exists $MRS_FlexiInstancer_Popup_MenuItem_CounterTwistOptions`) { deleteUI -menuItem $MRS_FlexiInstancer_Popup_MenuItem_CounterTwistOptions; }
+	if (`menuItem -e -exists $MRS_FlexiInstancer_Popup_MenuItem_DeleteCounterTwistCache`) { deleteUI -menuItem $MRS_FlexiInstancer_Popup_MenuItem_DeleteCounterTwistCache; }
+	if (`menuItem -e -exists $MRS_FlexiInstancer_Popup_MenuItem_BuildCounterTwistCache`) { deleteUI -menuItem $MRS_FlexiInstancer_Popup_MenuItem_BuildCounterTwistCache; }
+}
+
+
+//	Description
+//	-----------
+//	This procedure deletes menuItems from the currently parented marking menu then appends our own custom items
+//	Provides custom commands for FlexiInstancer_UpVectorManip nodes
+global proc MRS_FlexiInstancer_createUpVectorManipMenu(string $manipNodePlugName)
+{
+	// Global control names
+	global string $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_ToggleState;
+	global string $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetToCurrent;
+	global string $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetKey;
+	global string $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetAllKeys;
+	global string $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetDirectionKey;
+	global string $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetStateKey;
+	global string $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SelectKeys;
+	global string $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SelectAllKeys;
+	global string $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SelectDirectionKeys;
+	global string $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SelectStateKeys;
+
+	string $parent = `setParent -q -menu`;
+	
+	if (endsWith($parent, "ConvertPop")) { return; }
+	
+	MRS_FlexiInstancer_deleteUpVectorManipMenuItems();
+	
+	string $currentPanel = `getPanel -underPointer`;
+	
+	if (`getPanel -typeOf $currentPanel` == "modelPanel")
+	{
+		popupMenu -e -deleteAllItems $parent;
+
+		$MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_ToggleState = `menuItem
+			-label "Toggle State"
+			-command ("MRS_FlexiInstancer_toggleUpVectorManipState " + $manipNodePlugName)
+			-radialPosition "N" 
+			-enableCommandRepeat 1`;
+
+		$MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetToCurrent = `menuItem
+			-label "Set To Current"
+			-command ("MRS_FlexiInstancer_setUpVectorManipToCurrent " + $manipNodePlugName)
+			-radialPosition "S" 
+			-enableCommandRepeat 1`;
+
+		$MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetKey = `menuItem
+			-label "Set Key"
+			-subMenu true
+			-radialPosition "E"`;
+
+			$MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetAllKeys = `menuItem
+				-label "All"
+				-command ("MRS_FlexiInstancer_setAllUpVectorManipKeys " + $manipNodePlugName)
+				-radialPosition "N" 
+				-enableCommandRepeat 1`;
+
+			$MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetDirectionKey = `menuItem
+				-label "Direction"
+				-command ("MRS_FlexiInstancer_setUpVectorManipDirectionKey " + $manipNodePlugName)
+				-radialPosition "E" 
+				-enableCommandRepeat 1`;
+
+			$MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetStateKey = `menuItem
+				-label "State"
+				-command ("MRS_FlexiInstancer_setUpVectorManipStateKey " + $manipNodePlugName)
+				-radialPosition "W" 
+				-enableCommandRepeat 1`;
+
+			setParent -m $parent;
+
+		$MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SelectKeys = `menuItem
+			-label "Select Keys"
+			-subMenu true
+			-radialPosition "W"`;
+
+			$MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SelectAllKeys = `menuItem
+				-label "All"
+				-command ("MRS_FlexiInstancer_selectAllUpVectorManipKeys " + $manipNodePlugName)
+				-radialPosition "N" 
+				-enableCommandRepeat 1`;
+
+			$MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SelectDirectionKeys = `menuItem
+				-label "Direction"
+				-command ("MRS_FlexiInstancer_selectUpVectorManipDirectionKeys " + $manipNodePlugName)
+				-radialPosition "E" 
+				-enableCommandRepeat 1`;
+
+			$MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SelectStateKeys = `menuItem
+				-label "State"
+				-command ("MRS_FlexiInstancer_selectUpVectorManipStateKeys " + $manipNodePlugName)
+				-radialPosition "W" 
+				-enableCommandRepeat 1`;
+
+			setParent -m $parent;
+	}
+	else
+	{
+		warning("FlexiInstancer: Unexpected behaviour, RMB event occurred over non model panel : " + $currentPanel);
+	}
+}
+
+
+//	Description
+//	-----------
+// 	Deletes menuItems from the above menu
+global proc MRS_FlexiInstancer_deleteUpVectorManipMenuItems()
+{
+	// Global control names
+	global string $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_ToggleState;
+	global string $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetToCurrent;
+	global string $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetKey;
+	global string $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetAllKeys;
+	global string $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetDirectionKey;
+	global string $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetStateKey;
+	global string $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SelectKeys;
+	global string $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SelectAllKeys;
+	global string $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SelectDirectionKeys;
+	global string $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SelectStateKeys;
+
+	if (`menuItem -e -exists $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_ToggleState`) { deleteUI -menuItem $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_ToggleState; }
+	if (`menuItem -e -exists $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetToCurrent`) { deleteUI -menuItem $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetToCurrent; }
+	if (`menuItem -e -exists $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetKey`) { deleteUI -menuItem $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetKey; }
+	if (`menuItem -e -exists $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetAllKeys`) { deleteUI -menuItem $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetAllKeys; }
+	if (`menuItem -e -exists $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetDirectionKey`) { deleteUI -menuItem $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetDirectionKey; }
+	if (`menuItem -e -exists $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetStateKey`) { deleteUI -menuItem $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SetStateKey; }
+	if (`menuItem -e -exists $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SelectKeys`) { deleteUI -menuItem $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SelectKeys; }
+	if (`menuItem -e -exists $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SelectAllKeys`) { deleteUI -menuItem $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SelectAllKeys; }
+	if (`menuItem -e -exists $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SelectDirectionKeys`) { deleteUI -menuItem $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SelectDirectionKeys; }
+	if (`menuItem -e -exists $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SelectStateKeys`) { deleteUI -menuItem $MRS_FlexiInstancerUpVectorManip_Popup_MenuItem_SelectStateKeys; }
+}
+
+
+//	Description
+//	-----------
+//	This procedure deletes menuItems from the currently parented marking menu then appends our own custom items
+//	Provides custom commands for FlexiInstancer_ScaleAdjustmentManip nodes
+global proc MRS_FlexiInstancer_createScaleAdjustmentManipMenu(string $manipNodePlugName)
+{
+	// Global control names
+	global string $MRS_FlexiInstancerScaleAdjustmentManip_Popup_MenuItem_Adjust;
+	global string $MRS_FlexiInstancerScaleAdjustmentManip_Popup_MenuItem_Reset;
+
+	string $parent = `setParent -q -menu`;
+	
+	if (endsWith($parent, "ConvertPop")) { return; }
+	
+	MRS_FlexiInstancer_deleteScaleAdjustmentManipMenuItems();
+	
+	string $currentPanel = `getPanel -underPointer`;
+	
+	if (`getPanel -typeOf $currentPanel` == "modelPanel")
+	{
+		popupMenu -e -deleteAllItems $parent;
+
+		$MRS_FlexiInstancerScaleAdjustmentManip_Popup_MenuItem_Adjust = `menuItem
+			-label "Adjust"
+			-command ("MRS_FlexiInstancer_scaleAdjustmentUINew " + $manipNodePlugName)
+			-radialPosition "N" 
+			-enableCommandRepeat 1`;
+
+		$MRS_FlexiInstancerScaleAdjustmentManip_Popup_MenuItem_Reset = `menuItem
+			-label "Reset"
+			-command ("MRS_FlexiInstancer_resetScaleAdjustmentManip " + $manipNodePlugName)
+			-radialPosition "S" 
+			-enableCommandRepeat 1`;
+	}
+	else
+	{
+		warning("FlexiInstancer: Unexpected behaviour, RMB event occurred over non model panel : " + $currentPanel);
+	}
+}
+
+
+//	Description
+//	-----------
+// 	Deletes menuItems from the above menu
+global proc MRS_FlexiInstancer_deleteScaleAdjustmentManipMenuItems()
+{
+	// Global control names
+	global string $MRS_FlexiInstancerScaleAdjustmentManip_Popup_MenuItem_Adjust;
+	global string $MRS_FlexiInstancerScaleAdjustmentManip_Popup_MenuItem_Reset;
+
+	if (`menuItem -e -exists $MRS_FlexiInstancerScaleAdjustmentManip_Popup_MenuItem_Adjust`) { deleteUI -menuItem $MRS_FlexiInstancerScaleAdjustmentManip_Popup_MenuItem_Adjust; }
+	if (`menuItem -e -exists $MRS_FlexiInstancerScaleAdjustmentManip_Popup_MenuItem_Reset`) { deleteUI -menuItem $MRS_FlexiInstancerScaleAdjustmentManip_Popup_MenuItem_Reset; }
+}
+
+
+//	Description
+//	-----------
+//	This procedure deletes menuItems from the currently parented marking menu then appends our own custom items
+//	Provides custom commands for FlexiInstancer_TwistAdjustmentManip nodes
+global proc MRS_FlexiInstancer_createTwistAdjustmentManipMenu(string $manipNodePlugName)
+{
+	// Global control names
+	global string $MRS_FlexiInstancerTwistAdjustmentManip_Popup_MenuItem_Adjust;
+	global string $MRS_FlexiInstancerTwistAdjustmentManip_Popup_MenuItem_Reset;
+
+	string $parent = `setParent -q -menu`;
+	
+	if (endsWith($parent, "ConvertPop")) { return; }
+	
+	MRS_FlexiInstancer_deleteTwistAdjustmentManipMenuItems();
+	
+	string $currentPanel = `getPanel -underPointer`;
+	
+	if (`getPanel -typeOf $currentPanel` == "modelPanel")
+	{
+		popupMenu -e -deleteAllItems $parent;
+
+		$MRS_FlexiInstancerTwistAdjustmentManip_Popup_MenuItem_Adjust = `menuItem
+			-label "Adjust"
+			-command ("MRS_FlexiInstancer_twistAdjustmentUINew " + $manipNodePlugName)
+			-radialPosition "N" 
+			-enableCommandRepeat 1`;
+
+		$MRS_FlexiInstancerTwistAdjustmentManip_Popup_MenuItem_Reset = `menuItem
+			-label "Reset"
+			-command ("MRS_FlexiInstancer_resetTwistAdjustmentManip " + $manipNodePlugName)
+			-radialPosition "S" 
+			-enableCommandRepeat 1`;
+	}
+	else
+	{
+		warning("FlexiInstancer: Unexpected behaviour, RMB event occurred over non model panel : " + $currentPanel);
+	}
+}
+
+
+//	Description
+//	-----------
+// 	Deletes menuItems from the above menu
+global proc MRS_FlexiInstancer_deleteTwistAdjustmentManipMenuItems()
+{
+	// Global control names
+	global string $MRS_FlexiInstancerTwistAdjustmentManip_Popup_MenuItem_Adjust;
+	global string $MRS_FlexiInstancerTwistAdjustmentManip_Popup_MenuItem_Reset;
+
+	if (`menuItem -e -exists $MRS_FlexiInstancerTwistAdjustmentManip_Popup_MenuItem_Adjust`) { deleteUI -menuItem $MRS_FlexiInstancerTwistAdjustmentManip_Popup_MenuItem_Adjust; }
+	if (`menuItem -e -exists $MRS_FlexiInstancerTwistAdjustmentManip_Popup_MenuItem_Reset`) { deleteUI -menuItem $MRS_FlexiInstancerTwistAdjustmentManip_Popup_MenuItem_Reset; }
+}
+
+
+//	Description
+//	-----------
+//	This procedure deletes menuItems from the currently parented marking menu then appends our own custom items
+//	Provides custom commands for FlexiInstancer_PositionAdjustmentManip nodes
+global proc MRS_FlexiInstancer_createPositionAdjustmentManipMenu(string $manipNodePlugName)
+{
+	// Global control names
+	global string $MRS_FlexiInstancerPositionAdjustmentManip_Popup_MenuItem_Adjust;
+	global string $MRS_FlexiInstancerPositionAdjustmentManip_Popup_MenuItem_Reset;
+
+	string $parent = `setParent -q -menu`;
+	
+	if (endsWith($parent, "ConvertPop")) { return; }
+	
+	MRS_FlexiInstancer_deletePositionAdjustmentManipMenuItems();
+	
+	string $currentPanel = `getPanel -underPointer`;
+	
+	if (`getPanel -typeOf $currentPanel` == "modelPanel")
+	{
+		popupMenu -e -deleteAllItems $parent;
+
+		$MRS_FlexiInstancerPositionAdjustmentManip_Popup_MenuItem_Adjust = `menuItem
+			-label "Adjust"
+			-command ("MRS_FlexiInstancer_positionAdjustmentUINew " + $manipNodePlugName)
+			-radialPosition "N" 
+			-enableCommandRepeat 1`;
+
+		$MRS_FlexiInstancerPositionAdjustmentManip_Popup_MenuItem_Reset = `menuItem
+			-label "Reset"
+			-command ("MRS_FlexiInstancer_resetPositionAdjustmentManip " + $manipNodePlugName)
+			-radialPosition "S" 
+			-enableCommandRepeat 1`;
+	}
+	else
+	{
+		warning("FlexiInstancer: Unexpected behaviour, RMB event occurred over non model panel : " + $currentPanel);
+	}
+}
+
+
+//	Description
+//	-----------
+// 	Deletes menuItems from the above menu
+global proc MRS_FlexiInstancer_deletePositionAdjustmentManipMenuItems()
+{
+	// Global control names
+	global string $MRS_FlexiInstancerPositionAdjustmentManip_Popup_MenuItem_Adjust;
+	global string $MRS_FlexiInstancerPositionAdjustmentManip_Popup_MenuItem_Reset;
+
+	if (`menuItem -e -exists $MRS_FlexiInstancerPositionAdjustmentManip_Popup_MenuItem_Adjust`) { deleteUI -menuItem $MRS_FlexiInstancerPositionAdjustmentManip_Popup_MenuItem_Adjust; }
+	if (`menuItem -e -exists $MRS_FlexiInstancerPositionAdjustmentManip_Popup_MenuItem_Reset`) { deleteUI -menuItem $MRS_FlexiInstancerPositionAdjustmentManip_Popup_MenuItem_Reset; }
+}

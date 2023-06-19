@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+  <using package='maya'/>
+  <using package='std'/>
+  <template name='NE${NODE_NAME_PREFIX}PackAngleArray'>
+    <attribute name='message' type='maya.message'>
+      <label>Message</label>
+    </attribute>
+    <attribute name='output' type='maya.${NODE_NAME_PREFIX}AngleArray'>
+      <label>Output</label>
+    </attribute>
+    <attribute name='input' type='maya.doubleAngle'>
+      <label>Input</label>
+    </attribute>
+    <attribute name='fill' type='maya.doubleAngle'>
+      <label>Fill</label>
+    </attribute>
+    <attribute name='fillLogically' type='maya.boolean'>
+      <label>Fill Logically</label>
+    </attribute>
+    <attribute name='size' type='maya.long'>
+      <label>Size</label>
+    </attribute>
+  </template>
+  <view name='NEDefault' template='NE${NODE_NAME_PREFIX}PackAngleArray'>
+    <property name='message'/>
+    <property name='output'/>
+    <property name='input'/>
+    <property name='fill'/>
+    <property name='fillLogically'/>
+    <property name='size'/>
+  </view>
+</templates>

@@ -1,0 +1,24 @@
+// ------ Position Adjustment Window - Replace -------------------------------------------------------------------------------------------------------------------------------------------
+
+global string $MRS_FlexiInstancer_PositionAdjustmentUI_WorkspaceControl = "MRS_FlexiInstancer_PositionAdjustmentUI_WorkspaceControl";
+global string $MRS_FlexiInstancer_PositionAjustmentUI = "MRS_FlexiInstancer_PositionAjustmentUI";
+
+global proc MRS_FlexiInstancer_positionAdjustmentUIReplace(string $nodeManipPlugName)
+{
+	// Global values
+	global string $MRS_FlexiInstancer_PositionAdjustmentUI_WorkspaceControl;
+	global string $MRS_FlexiInstancer_PositionAjustmentUI;
+	
+	if (`workspaceControl -q -exists $MRS_FlexiInstancer_PositionAdjustmentUI_WorkspaceControl` && `workspaceControl -q -visible $MRS_FlexiInstancer_PositionAdjustmentUI_WorkspaceControl`)
+	{
+		if (`window -q -exists $MRS_FlexiInstancer_PositionAjustmentUI`)
+		{
+			if (`window -q -title $MRS_FlexiInstancer_PositionAjustmentUI` == ($nodeManipPlugName + ".positionAdjustmentRamp"))
+				return;
+		}
+		
+		int $isCollapsed = `workspaceControl -q -collapse $MRS_FlexiInstancer_PositionAdjustmentUI_WorkspaceControl`;
+		MRS_FlexiInstancer_positionAdjustmentUINew $nodeManipPlugName;
+		workspaceControl -e -collapse $isCollapsed $MRS_FlexiInstancer_PositionAdjustmentUI_WorkspaceControl;
+	}
+}

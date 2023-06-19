@@ -1,0 +1,16 @@
+// ------ AE Template ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc AEmrs_NormalizeDoubleArrayTemplate( string $nodeName )
+{
+    editorTemplate -beginScrollLayout;
+
+    // Defaults
+    AEdependNodeTemplate $nodeName;
+    editorTemplate -addExtraControls;
+
+    // Suppress controls
+    editorTemplate -suppress "input";
+    editorTemplate -suppress "output";
+
+    editorTemplate -endScrollLayout;
+}

@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+	<using package='maya'/>
+	<using package='std'/>
+	<template name='NE${NODE_NAME_PREFIX}PostMultiplyMatrixByAxisYAngle'>
+		<attribute name='message' type='maya.message'>
+			<label>Message</label>
+		</attribute>
+		<attribute name='output' type='maya.matrix'>
+			<label>Output</label>
+		</attribute>
+		<attribute name='input' type='maya.matrix'>
+			<label>Input</label>
+		</attribute>
+		<attribute name='angleY' type='maya.doubleAngle'>
+			<label>Angle Y</label>
+		</attribute>
+	</template>
+	<view name='NEDefault' template='NE${NODE_NAME_PREFIX}PostMultiplyMatrixByAxisYAngle'>
+		<property name='message'/>
+		<property name='output'/>
+		<property name='input'/>
+		<property name='angleY'/>
+	</view>
+</templates>

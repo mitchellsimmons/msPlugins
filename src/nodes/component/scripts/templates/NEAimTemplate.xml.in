@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+	<using package='maya'/>
+	<template name='NE${NODE_NAME_PREFIX}Aim'>
+		<attribute name='message' type='maya.message'>
+			<label>Message</label>
+		</attribute>
+    <attribute name='output' type='maya.matrix'>
+      <label>Output</label>
+    </attribute>
+		<attribute name='aimAxis' type='maya.enum'>
+			<label>Aim Axis</label>
+		</attribute>
+		<attribute name='upAxis' type='maya.enum'>
+			<label>Up Axis</label>
+		</attribute>
+		<attribute name='rootPosition' type='maya.matrix'>
+			<label>Root Position</label>
+		</attribute>
+		<attribute name='aimPosition' type='maya.matrix'>
+			<label>Aim Position</label>
+		</attribute>
+		<attribute name='upPosition' type='maya.matrix'>
+			<label>Up Position</label>
+		</attribute>
+	</template>
+	<view name='NEDefault' template='NE${NODE_NAME_PREFIX}Aim'>
+    <property name='message'/>
+    <property name='output'/>
+		<property name='aimAxis'/>
+		<property name='upAxis'/>
+		<property name='rootPosition'/>
+		<property name='aimPosition'/>
+		<property name='upPosition'/>
+	</view>
+</templates>

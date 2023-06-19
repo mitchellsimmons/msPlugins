@@ -1,0 +1,38 @@
+// ------ AE Template ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc AE${NODE_NAME_PREFIX}ArithmeticSequenceDoubleArrayTemplate( string $nodeName )
+{
+    string $annotation;
+
+    editorTemplate -beginScrollLayout;
+
+    editorTemplate -beginLayout "General" -collapse 0;
+
+        MRS_AEspacer();
+
+        $annotation = "Defines the size of the output array.";
+        editorTemplate -label "Size" -annotation $annotation -addControl "size";
+
+        MRS_AEspacer();
+        
+        $annotation = "Defines the initial value of the array.";
+        editorTemplate -label "First Term" -annotation $annotation -addControl "firstTerm";
+
+        MRS_AEspacer();
+
+        $annotation = "Defines the common difference between each sequential element of the array.";
+        editorTemplate -label "Common Difference" -annotation $annotation -addControl "commonDifference";
+
+        MRS_AEspacer();
+
+    editorTemplate -endLayout;
+
+    // Default controls
+    AEdependNodeTemplate $nodeName;
+    editorTemplate -addExtraControls;
+
+    // Suppress controls
+    editorTemplate -suppress "outputSequence";
+
+    editorTemplate -endScrollLayout;
+}

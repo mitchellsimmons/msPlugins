@@ -1,0 +1,114 @@
+// ------ AE Template ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc AE${NODE_NAME_PREFIX}VChainSolverTemplate( string $nodeName )
+{
+    string $annotation;
+
+    editorTemplate -beginScrollLayout;
+
+    editorTemplate -beginLayout "Inputs" -collapse 0;
+
+		MRS_AEspacer();
+
+        $annotation = "Defines the axis down which the aim-vector of the solution will be oriented.";
+        editorTemplate -label "Aim Axis" -annotation $annotation -addControl "aimAxis";
+
+		MRS_AEspacer();
+
+        $annotation = "Defines the axis down which the up-vector of the solution will be oriented.";
+        editorTemplate -label "Up Axis" -annotation $annotation -addControl "upAxis";
+
+		MRS_AEspacer();
+
+        $annotation = "Defines the angular direction of the chain. The backwards direction results in negated angles.";
+        editorTemplate -label "Direction" -annotation $annotation -addControl "direction";
+
+        MRS_AEspacer();
+
+        $annotation = "Defines the length of the first segment.";
+        editorTemplate -label "Length 0" -annotation $annotation -addControl "length0";
+
+        MRS_AEspacer();
+        
+        $annotation = "Defines the length of the second segment.";
+        editorTemplate -label "Length 1" -annotation $annotation -addControl "length1";
+
+        MRS_AEspacer();
+
+        $annotation = "Defines the type behaviour used to solve the chain lengths and angles.";
+        editorTemplate -label "Solver" -annotation $annotation -addControl "solver";
+
+        MRS_AEspacer();
+
+		$annotation = "Defines whether output frames should have sequential locality or a shared locality (ie. flat hierarchy).";
+        editorTemplate -label "Hierarchical Output" -annotation $annotation -addControl "hierarchicalOutput";
+
+		MRS_AEspacer();
+
+		$annotation = "A frame that provides the world position of the root transform.";
+        editorTemplate -label "Root Position" -annotation $annotation -addControl "rootPosition";
+
+		MRS_AEspacer();
+
+		$annotation = "A frame that provides the world position of the handle transform.";
+        editorTemplate -label "Handle Position" -annotation $annotation -addControl "handlePosition";
+
+        MRS_AEspacer();
+
+		$annotation = "A frame that provides the world position of the up-vector transform.";
+        editorTemplate -label "Up Vector Position" -annotation $annotation -addControl "upVectorPosition";
+
+        MRS_AEspacer();
+
+		$annotation = "An inverse world frame used to localise the solution to a parent.";
+        editorTemplate -label "Parent Inverse Frame" -annotation $annotation -addControl "parentInverseFrame";
+
+        MRS_AEspacer();
+
+		$annotation = "Defines how far the chain can be compressed, as a percentage of the maximum rigid length.";
+        editorTemplate -label "Max Compression Ratio" -annotation $annotation -addControl "maxCompressionRatio";
+
+        MRS_AEspacer();
+
+		$annotation = "Defines how far the chain can be rigidly extended, as a percentage of the maximum rigid length.";
+        editorTemplate -label "Max Rigid Extension Ratio" -annotation $annotation -addControl "maxRigidExtensionRatio";
+
+        MRS_AEspacer();
+
+		$annotation = "Defines how far the chain can be non-rigidly extended, as a percentage of the maximum rigid length.";
+        editorTemplate -label "Max Non Rigid Extension Ratio" -annotation $annotation -addControl "maxNonRigidExtensionRatio";
+
+        MRS_AEspacer();
+
+		$annotation = "Defines how far the height will be reduced at maximum non-rigid extension, as a percentage of the rigid height at maximum rigid extension.";
+        editorTemplate -label "Max Height Reduction Ratio" -annotation $annotation -addControl "maxHeightReductionRatio";
+
+        MRS_AEspacer();
+
+		$annotation = "Defines the rate of change in height when the heightReductionExtension solver choice is selected.";
+        editorTemplate -label "Height Reduction Deceleration" -annotation $annotation -addControl "heightReductionDeceleration";
+
+        MRS_AEspacer();
+
+    editorTemplate -endLayout;
+
+    editorTemplate -beginLayout "Outputs" -collapse 1;
+
+        MRS_AEspacer();
+
+        $annotation = "The distance between the root position and the effector position.";
+        editorTemplate -label "Output Root To Effector Offset" -annotation $annotation -addControl "outputRootToEffectorOffset";
+
+        MRS_AEspacer();
+
+    editorTemplate -endLayout;
+
+    // Default controls
+    AEdependNodeTemplate $nodeName;
+    editorTemplate -addExtraControls;
+
+	// Suppress controls
+    editorTemplate -suppress "outputFrames";
+
+    editorTemplate -endScrollLayout;
+}

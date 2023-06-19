@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+	<using package='maya'/>
+	<using package='std'/>
+	<template name='NEmrs_RoundAngle'>
+		<attribute name='message' type='maya.message'>
+			<label>Message</label>
+		</attribute>
+		<attribute name='output' type='maya.doubleAngle'>
+			<label>Output</label>
+		</attribute>
+		<attribute name='input' type='maya.doubleAngle'>
+			<label>Input</label>
+		</attribute>
+	</template>
+	<view name='NEDefault' template='NEmrs_RoundAngle'>
+		<property name='message'/>
+		<property name='output'/>
+		<property name='input'/>
+	</view>
+</templates>

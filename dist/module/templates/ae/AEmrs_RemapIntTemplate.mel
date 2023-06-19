@@ -1,0 +1,48 @@
+// ------ AE Template ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc AEmrs_RemapIntTemplate( string $nodeName )
+{
+    editorTemplate -beginScrollLayout;
+
+    editorTemplate -beginLayout "Inputs" -collapse 0;
+
+        MRS_AEspacer();
+        
+        editorTemplate -label "Input" -addControl "input";
+
+        MRS_AEspacer();
+        
+        editorTemplate -label "Low 1" -addControl "low1";
+
+        MRS_AEspacer();
+
+        editorTemplate -label "High 1" -addControl "high1";
+
+        MRS_AEspacer();
+
+        editorTemplate -label "Low 2" -addControl "low2";
+
+        MRS_AEspacer();
+
+        editorTemplate -label "High 2" -addControl "high2";
+
+        MRS_AEspacer();
+
+    editorTemplate -endLayout;
+
+    editorTemplate -beginLayout "Outputs" -collapse 1;
+
+        MRS_AEspacer();
+        
+        editorTemplate -label "Output" -addControl "output";
+
+        MRS_AEspacer();
+
+    editorTemplate -endLayout;
+
+    // Defaults
+    AEdependNodeTemplate $nodeName;
+    editorTemplate -addExtraControls;
+
+    editorTemplate -endScrollLayout;
+}

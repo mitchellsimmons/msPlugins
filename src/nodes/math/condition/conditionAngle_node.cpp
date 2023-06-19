@@ -1,0 +1,68 @@
+#include "conditionAngle_node.h"
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+ConditionAngle::ConditionAngle() {}
+ConditionAngle::~ConditionAngle() {}
+
+// ------ Attr ------
+MObject ConditionAngle::input1Attr;
+MObject ConditionAngle::input2Attr;
+MObject ConditionAngle::operatorAttr;
+MObject ConditionAngle::outputAttr;
+
+// ------ MPxNode ------
+MPxNode::SchedulingType ConditionAngle::schedulingType() const
+{
+	return SchedulingType::kParallel;
+}
+
+MStatus ConditionAngle::initialize()
+{
+	std::unordered_map<const char*, short> operatorFields{ {"Equal", 0}, {"Not Equal", 1}, {"Greater", 2}, {"Greater or Equal", 3}, {"Less", 4}, {"Less or Equal", 5} };
+	createAngleAttribute(input1Attr, "input1", "input1", 0.0, kDefaultPreset | kKeyable);
+	createAngleAttribute(input2Attr, "input2", "input2", 0.0, kDefaultPreset | kKeyable);
+	createEnumAttribute(operatorAttr, "operator", "operator", operatorFields, 0, kDefaultPreset | kKeyable);
+	createBoolAttribute(outputAttr, "output", "output", true, kReadOnlyPreset);
+
+	addAttribute(input1Attr);
+	addAttribute(input2Attr);
+	addAttribute(operatorAttr);
+	addAttribute(outputAttr);
+
+	attributeAffects(input1Attr, outputAttr);
+	attributeAffects(input2Attr, outputAttr);
+	attributeAffects(operatorAttr, outputAttr);
+
+	return MStatus::kSuccess;
+}
+
+MStatus ConditionAngle::compute(const MPlug& plug, MDataBlock& dataBlock)
+{
+	if (plug != outputAttr)
+		return MStatus::kUnknownParameter;
+
+	double input1 = inputAngleValue(dataBlock, input1Attr).asRadians();
+	double input2 = inputAngleValue(dataBlock, input2Attr).asRadians();
+	short op = inputEnumValue(dataBlock, operatorAttr);
+
+	bool output = false;
+	if (op == 0)
+		output = MRS::isEqual(input1, input2);
+	else if (op == 1)
+		output = !MRS::isEqual(input1, input2);
+	else if (op == 2)
+		output = input1 > input2;
+	else if (op == 3)
+		output = input1 > input2 || MRS::isEqual(input1, input2);
+	else if (op == 4)
+		output = input1 < input2;
+	else if (op == 5)
+		output = input1 < input2 || MRS::isEqual(input1, input2);
+
+	outputBoolValue(dataBlock, outputAttr, output);
+
+	return MStatus::kSuccess;
+}
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------

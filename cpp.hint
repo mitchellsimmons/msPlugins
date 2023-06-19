@@ -1,0 +1,5 @@
+// Hint files help the Visual Studio IDE interpret Visual C++ identifiers
+// such as names of functions and macros.
+// For more information see https://go.microsoft.com/fwlink/?linkid=865984
+#define VALIDATE_AND_SET_VALUE_PROTOYPE validateAndSetValue(const MPlug& plug, const MDataHandle& handle)
+#define VALIDATE_AND_SET_VALUE_PROTOYPE validateAndSetValue(const MPlug& plug, const MDataHandle& handle, const MDGContext& context)

@@ -1,0 +1,109 @@
+// Source scripts for access to internal globals
+source "AEnewNonNumericMulti.mel";
+
+
+//  Description
+//  -----------
+//  Creates a new control for a specific element of a vector type array attribute which contains four or less numeric child attributes
+global proc MRS_AEnewVectorArrayControl(string $nodeAttrName, int $elementIndex)
+{
+    if ($elementIndex == -1) return;
+
+    // Data
+    string $buffer[];
+    tokenize($nodeAttrName, ".", $buffer);
+    string $nodeName = $buffer[0];
+    string $attrName = $buffer[1];
+    string $nodePlugName = $nodeAttrName + "[" + $elementIndex + "]";
+    string $plugNiceName = `attributeName -nice $nodePlugName`;
+    int $numChildAttrs[] = `attributeQuery -node $nodeName -nc $attrName`;
+
+    // Maya's default implementation uses a rowLayout however attrFieldGrps with 3 or more controls do not fit properly therefore we use a formLayout instead
+    string $formLayout_main = `formLayout`;
+
+        // If the attribute has four children, the default sizes do not work so we must manually specify them (see "AEnewQuaternion.mel")
+        string $attrFieldGrp;
+        if ($numChildAttrs[0] == 4)
+            $attrFieldGrp = `attrFieldGrp -l $plugNiceName -attribute $nodePlugName -precision 3 -cw5 145 70 70 70 70`;
+        else
+            $attrFieldGrp = `attrFieldGrp -l $plugNiceName -attribute $nodePlugName -precision 3`;
+        string $symbolButton = `symbolButton -image "smallTrash.png" -command ("removeMultiInstance -break true " + $nodePlugName)`;
+
+        formLayout -e
+            -attachForm $attrFieldGrp "top"    0
+            -attachForm $attrFieldGrp "left"   0
+            -attachForm $attrFieldGrp "bottom" 0
+            -attachControl $symbolButton "left"  0 $attrFieldGrp
+            $formLayout_main;
+
+    setParent ..;
+}
+
+
+//  Description
+//  -----------
+//  This procedure creates a new layout for vector array attributes which contain four or less numeric child attributes (it adds controls for any existing elements)
+//  Instead of implementing the default functionality Maya uses for compound array types (see "AEnewNonNumericMulti.mel"), we implement a custom layout
+//  Our custom implementation resolves certain issues such as controls not fitting within the default layout
+//  We also ensure each control is named with the correct logical index (Maya displays physical indices by default)
+//  This procedure will return the name of the outermost frameLayout which should be used to access child controls
+global proc string MRS_AEnewVectorArray(string $nodeAttrName, string $annotation)
+{
+    // Global values
+    global int $gMaxNonNumericMultis;
+
+    // Data
+    string $buffer[];
+    tokenize($nodeAttrName, ".", $buffer);
+    string $nodeName = $buffer[0];
+    string $attrName = $buffer[1];
+    string $attrNiceName = `attributeName -nice $nodeAttrName`;
+
+    int $elementIndices[] = `getAttr -multiIndices $nodeAttrName`;
+    int $numElements = size($elementIndices);
+
+    // UI
+    string $frameLayout_main = `frameLayout -collapsable true -label $attrNiceName -collapse false -annotation $annotation`;
+
+        text -label "" -height 1;
+
+        // Hide the columnLayout while we're creating controls
+        string $columnLayout_main = `columnLayout -adj true -rowSpacing 4 -vis false`;
+
+            // "Add New Item" button
+            rowLayout -numberOfColumns 2;
+
+                text -label "";
+                // This proc adds a new element plug to the array (it exists in the "AEnewNonNumericMulti" file)
+                // We then rely on the attribute editor refreshing and calling the replace proc which will result in the UI controls being added
+                button -label (uiRes("m_AEnewNonNumericMulti.kAddNewItem")) -command ("AEnewNonNumericMultiAddNewItem " + $nodeName + " " + $attrName);
+
+            setParent ..;
+
+            // If there are more than $gMaxNonNumericMultis elements, clip them
+            int $tooBig = 0;
+            if ( $numElements > $gMaxNonNumericMultis )
+            {
+                $tooBig = $numElements - $gMaxNonNumericMultis;
+                $numElements = $gMaxNonNumericMultis;
+            }
+
+            // Build controls for existing element plugs (each control will be created under a parent formLayout)
+            // The commented-out AEnewNonNumericMultiCreateNewControl proc is what Maya implements by default (it does not work well with compound attributes)
+            for ( $i = 0; $i < $numElements; $i++ )
+                // AEnewNonNumericMultiCreateNewControl( $nodeName, $attrName, "\"\"", "AEnewVector", $elementIndices[$i]);
+                MRS_AEnewVectorArrayControl($nodeAttrName, $elementIndices[$i]);
+            
+            // Tell the user if there are elements that we cannot display
+            if ( $tooBig > 0 )
+                text -l `format -s $tooBig (uiRes("m_AEnewNonNumericMulti.kInsufficientRoom"))`;
+
+        setParent ..;
+
+        // Make the columnLayout visible
+        columnLayout -e -vis true $columnLayout_main;
+
+    setParent ..;
+
+    return $frameLayout_main;
+}

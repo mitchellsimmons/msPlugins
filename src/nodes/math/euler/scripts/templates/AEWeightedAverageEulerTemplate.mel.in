@@ -1,0 +1,37 @@
+// ------ AE Template ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc AE${NODE_NAME_PREFIX}WeightedAverageEulerTemplate( string $nodeName )
+{
+    editorTemplate -beginScrollLayout;
+
+    editorTemplate -beginLayout "Inputs" -collapse 0;
+
+        MRS_AEspacer();
+        
+        editorTemplate -label "Output Rotation Order" -addControl "outputRotationOrder";
+
+        MRS_AEspacer();
+
+    editorTemplate -endLayout;
+
+    editorTemplate -beginLayout "Outputs" -collapse 1;
+
+        MRS_AEspacer();
+        
+        editorTemplate -label "Output" -addControl "output";
+
+        MRS_AEspacer();
+
+    editorTemplate -endLayout;
+
+    // Defaults
+    AEdependNodeTemplate $nodeName;
+    editorTemplate -addExtraControls;
+
+    // Suppress controls
+    editorTemplate -suppress "input";
+    editorTemplate -suppress "weight";
+    editorTemplate -suppress "inputRotationOrder";
+
+    editorTemplate -endScrollLayout;
+}

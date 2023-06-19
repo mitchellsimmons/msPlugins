@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+	<using package='maya'/>
+	<template name='NE${NODE_NAME_PREFIX}VChainSolver'>
+		<attribute name='message' type='maya.message'>
+			<label>Message</label>
+		</attribute>
+		<attribute name='outputFrames' type='maya.matrixArray'>
+			<label>Output Frames</label>
+		</attribute>
+		<attribute name='outputRootToEffectorOffset' type='maya.double'>
+			<label>Output Root To Effector Offset</label>
+		</attribute>
+		<attribute name='aimAxis' type='maya.enum'>
+			<label>Aim Axis</label>
+		</attribute>
+		<attribute name='upAxis' type='maya.enum'>
+			<label>Up Axis</label>
+		</attribute>
+		<attribute name='direction' type='maya.enum'>
+			<label>Direction</label>
+		</attribute>
+		<attribute name='length0' type='maya.double'>
+			<label>Length 0</label>
+		</attribute>
+		<attribute name='length1' type='maya.double'>
+			<label>Length 1</label>
+		</attribute>
+		<attribute name='solver' type='maya.enum'>
+			<label>Solver</label>
+		</attribute>
+		<attribute name='hierarchicalOutput' type='maya.bool'>
+			<label>Hierarchical Output</label>
+		</attribute>
+		<attribute name='rootPosition' type='maya.matrix'>
+			<label>Root Position</label>
+		</attribute>
+		<attribute name='handlePosition' type='maya.matrix'>
+			<label>Handle Position</label>
+		</attribute>
+		<attribute name='upVectorPosition' type='maya.matrix'>
+			<label>Up Vector Position</label>
+		</attribute>
+		<attribute name='parentInverseFrame' type='maya.matrix'>
+			<label>Parent Inverse Frame</label>
+		</attribute>
+		<attribute name='maxCompressionRatio' type='maya.double'>
+			<label>Max Compression Ratio</label>
+		</attribute>
+		<attribute name='maxRigidExtensionRatio' type='maya.double'>
+			<label>Max Rigid Extension Ratio</label>
+		</attribute>
+		<attribute name='maxNonRigidExtensionRatio' type='maya.double'>
+			<label>Max Non Rigid Extension Ratio</label>
+		</attribute>
+		<attribute name='maxHeightReductionRatio' type='maya.double'>
+			<label>Max Height Reduction Ratio</label>
+		</attribute>
+		<attribute name='heightReductionDeceleration' type='maya.double'>
+			<label>Height Reduction Deceleration</label>
+		</attribute>
+	</template>
+	<view name='NEDefault' template='NE${NODE_NAME_PREFIX}VChainSolver'>
+		<property name='message'/>
+		<property name='outputFrames'/>
+		<property name='outputRootToEffectorOffset'/>
+		<property name='aimAxis'/>
+		<property name='upAxis'/>
+		<property name='direction'/>
+		<property name='length0'/>
+		<property name='length1'/>
+		<property name='solver'/>
+		<property name='hierarchicalOutput'/>
+		<property name='rootPosition'/>
+		<property name='handlePosition'/>
+		<property name='upVectorPosition'/>
+		<property name='parentInverseFrame'/>
+		<property name='maxCompressionRatio'/>
+		<property name='maxRigidExtensionRatio'/>
+		<property name='maxNonRigidExtensionRatio'/>
+		<property name='maxHeightReductionRatio'/>
+		<property name='heightReductionDeceleration'/>
+	</view>
+</templates>

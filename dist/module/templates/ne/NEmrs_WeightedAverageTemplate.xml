@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+	<using package='maya'/>
+	<template name='NEmrs_WeightedAverage'>
+		<attribute name='message' type='maya.message'>
+			<label>Message</label>
+		</attribute>
+		<attribute name='output' type='maya.double'>
+			<label>Output</label>
+		</attribute>
+		<attribute name='input' type='maya.doubleArray'>
+			<label>Input</label>
+		</attribute>
+		<attribute name='weight' type='maya.doubleArray'>
+			<label>Weight</label>
+		</attribute>
+	</template>
+	<view name='NEDefault' template='NEmrs_WeightedAverage'>
+		<property name='message'/>
+		<property name='output'/>
+		<property name='input'/>
+		<property name='weight'/>
+	</view>
+</templates>

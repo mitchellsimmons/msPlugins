@@ -1,0 +1,510 @@
+// ------ Debug Up Vector Window -------------------------------------------------------------------------------------------------------------------------------------------
+
+// Global optionVar names
+global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeRange = "MRS_FlexiChainSingle_DebugUpVectorUI_TimeRange";
+global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_StartTime = "MRS_FlexiChainSingle_DebugUpVectorUI_StartTime";
+global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_EndTime = "MRS_FlexiChainSingle_DebugUpVectorUI_EndTime";
+global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeStep = "MRS_FlexiChainSingle_DebugUpVectorUI_TimeStep";
+global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_DebugTolerance = "MRS_FlexiChainSingle_DebugUpVectorUI_DebugTolerance";
+
+// Global values
+global int $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultTimeRangeIndex = 0;
+global float $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultStartTime = 0.0;
+global float $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultEndTime = 24.0;
+global float $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultTimeStep = 1.0;
+global float $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultDebugTolerance = 0.2;
+
+global proc MRS_FlexiChainSingle_debugUpVectorUI(string $shapeNodeName)
+{
+	// Global optionVar names
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeRange;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_StartTime;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_EndTime;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeStep;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_DebugTolerance;
+
+	// Global control names
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI = "MRS_FlexiChainSingle_DebugUpVectorUI"; // Static, so Maya can store preferences
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_RadioCollection_TimeRange;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_RadioButton_TimeSlider;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_RadioButton_StartEnd;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_StartTime;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_EndTime;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_TimeStep;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_DebugTolerance;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_ScrollField_Ouput;
+
+	// Ensure optionVars exist
+	MRS_FlexiChainSingle_createDebugUpVectorUIDefaultSettings();
+
+	// Current optionVar values
+	int $currentTimeRangeIndex = `optionVar -q $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeRange`;
+	float $currentStartTime = `optionVar -q $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_StartTime`;
+	float $currentEndTime = `optionVar -q $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_EndTime`;
+	float $currentTimeStep = `optionVar -q $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeStep`;
+	float $currentDebugTolerance = `optionVar -q $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_DebugTolerance`;
+
+	// Callback control names
+	string $rowLayout_startTime = "MRS_FlexiChainSingle_DebugUpVectorUI_RowLayout_StartTime";
+	string $rowLayout_endTime = "MRS_FlexiChainSingle_DebugUpVectorUI_RowLayout_EndTime";
+
+	// Build window
+	if (`window -exists $MRS_FlexiChainSingle_DebugUpVectorUI`)
+	{
+		deleteUI $MRS_FlexiChainSingle_DebugUpVectorUI;
+		//windowPref -remove $MRS_FlexiChainSingle_DebugUpVectorUI;
+	}
+
+	window
+		-title "Up-Vector Debugger" -menuBar true -widthHeight 500 540 -docTag $shapeNodeName
+		$MRS_FlexiChainSingle_DebugUpVectorUI;
+
+	menu -label "Edit";
+		menuItem -label "Save Settings" -command "MRS_FlexiChainSingle_saveDebugUpVectorUICustomSettings";
+		menuItem -label "Reset Settings" -command "MRS_FlexiChainSingle_resetDebugUpVectorUIDefaultSettings";
+
+	string $formLayout_outerMain = `formLayout`;
+
+		// The top border gets cutoff (fix applied later)
+		string $tabLayout_main = `tabLayout -tabsVisible false`;
+		
+		// Attach the tabLayout at the given offsets
+		formLayout -e
+			-attachForm $tabLayout_main "top"    0
+			-attachForm $tabLayout_main "left"   7
+			-attachForm $tabLayout_main "bottom" 40 // Offset (7) + button height (25) + button offset (7)
+			-attachForm $tabLayout_main "right"  7
+			$formLayout_outerMain;
+			
+			string $formLayout_innerMain = `formLayout`;
+			
+				string $scrollLayout_main = `scrollLayout -childResizable true`;
+			
+				// Attach the scroll layout at the given offsets
+				formLayout -e
+					-attachForm $scrollLayout_main "top"    7
+					-attachForm $scrollLayout_main "left"   7
+					-attachForm $scrollLayout_main "bottom" 7
+					-attachForm $scrollLayout_main "right"  7
+					$formLayout_innerMain;
+
+					string $columnLayout_inner = `columnLayout -adjustableColumn true -rowSpacing 7`;
+						
+						frameLayout -label "Info" -collapsable true -backgroundShade true -marginHeight 7;
+						
+							rowLayout -numberOfColumns 2 -adjustableColumn 2 -columnAttach 1 "right" 40 -columnWidth 1 175;
+							
+								text -label "Node :";
+								text -label $shapeNodeName -align "left" -font "boldLabelFont";
+							
+							setParent ..;
+						setParent ..;
+				
+						frameLayout -label "Settings" -collapsable true -backgroundShade true -marginHeight 7;
+
+							rowLayout -numberOfColumns 3 -columnWidth3 175 115 100 -columnAttach 1 "right" 40;
+
+								text -label "Time range :";
+								$MRS_FlexiChainSingle_DebugUpVectorUI_RadioCollection_TimeRange = `radioCollection`;
+									$MRS_FlexiChainSingle_DebugUpVectorUI_RadioButton_TimeSlider = `radioButton -label "Time Slider"`;
+									$MRS_FlexiChainSingle_DebugUpVectorUI_RadioButton_StartEnd = `radioButton -label "Start/End" 
+										-onCommand ("disable -value false " + $rowLayout_startTime + "; disable -value false " + $rowLayout_endTime) 
+										-offCommand ("disable -value true " + $rowLayout_startTime + "; disable -value true " + $rowLayout_endTime)`;
+
+							setParent ..;
+							
+							rowLayout -numberOfColumns 3 -columnWidth3 175 115 100 -columnAttach 1 "right" 40 $rowLayout_startTime;
+
+								text -label "Start time :";
+								$MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_StartTime = `floatField -value $currentStartTime -precision 4 -step 10.0`;
+
+							setParent ..;
+
+							rowLayout -numberOfColumns 3 -columnWidth3 175 115 100 -columnAttach 1 "right" 40 $rowLayout_endTime;
+								
+								text -label "End time :";
+								$MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_EndTime = `floatField -value $currentEndTime -precision 4 -step 10.0`;
+
+							setParent ..;
+
+							columnLayout -adjustableColumn true -columnAttach "both" 50;
+
+								separator;
+							
+							setParent ..;
+
+							rowLayout -numberOfColumns 3 -columnWidth3 175 115 100 -columnAttach 1 "right" 40;
+								
+								text -label "Time step :";
+								$MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_TimeStep = `floatField -value $currentTimeStep -min 0.01 -precision 4 -step 1.0`;
+
+							setParent ..;
+
+							rowLayout -numberOfColumns 3 -columnWidth3 175 115 100 -columnAttach 1 "right" 40;
+								
+								text -label "Tolerance :";
+								$MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_DebugTolerance = `floatField -value $currentDebugTolerance -min 0.0 -max 1.0 -precision 4 -step 0.01`;
+
+							setParent ..;
+						setParent ..;
+
+						frameLayout -label "Output" -collapsable true -backgroundShade true -marginHeight 7 -marginWidth 7;
+
+							columnLayout -adjustableColumn true -rowSpacing 7;
+
+								$MRS_FlexiChainSingle_DebugUpVectorUI_ScrollField_Ouput = `scrollField -height 170 -editable false`;
+
+							setParent ..;
+						setParent ..;
+					setParent ..;
+				setParent ..;
+			setParent ..;
+		setParent ..;
+		
+		string $formLayout_bottomButtons = `formLayout -numberOfDivisions 2`;
+			string $button_debug = `button -height 25 -label "Debug" 
+				-command ("MRS_FlexiChainSingle_debugUpVector " + $shapeNodeName)`;
+			string $button_close = `button -height 25 -label "Close"
+				-command ("deleteUI -window " + $MRS_FlexiChainSingle_DebugUpVectorUI)`;
+		
+		// Attach the buttons at the given offsets
+		formLayout -e
+			-attachPosition $button_debug   "left"  0 0
+			-attachPosition $button_debug   "right" 2 1
+			-attachPosition $button_close   "left"  2 1
+			-attachPosition $button_close   "right" 0 2
+			$formLayout_bottomButtons;
+		
+		// Attach the form layout at the given offsets
+		formLayout -e
+			-attachForm $formLayout_bottomButtons "left"   7
+			-attachForm $formLayout_bottomButtons "bottom" 7
+			-attachForm $formLayout_bottomButtons "right"  7
+			$formLayout_outerMain;
+			
+		setParent ..;
+
+		// Trick to get the top border back
+		string $tabLayout_topFix = `tabLayout -borderStyle "top" -tabsVisible false`;
+		formLayout -e
+			-attachForm $tabLayout_topFix "top"    0
+			-attachForm $tabLayout_topFix "left"   7
+			-attachForm $tabLayout_topFix "right"  7
+			$formLayout_outerMain;
+
+	// Edit initial control states
+	if ($currentTimeRangeIndex == 0)
+	{
+		radioCollection -e -select $MRS_FlexiChainSingle_DebugUpVectorUI_RadioButton_TimeSlider $MRS_FlexiChainSingle_DebugUpVectorUI_RadioCollection_TimeRange;
+		disable -value true $rowLayout_startTime;
+		disable -value true $rowLayout_endTime;
+	}
+	else if ($currentTimeRangeIndex == 1)
+	{
+		radioCollection -e -select $MRS_FlexiChainSingle_DebugUpVectorUI_RadioButton_StartEnd $MRS_FlexiChainSingle_DebugUpVectorUI_RadioCollection_TimeRange;
+		disable -value false $rowLayout_startTime;
+		disable -value false $rowLayout_endTime;
+	}
+
+	setFocus $MRS_FlexiChainSingle_DebugUpVectorUI;
+	showWindow;
+}
+
+
+// ------ Debug Up Vector Window - Commands -------------------------------------------------------------------------------------------------------------------------------
+
+//	Description
+//	-----------
+//	Resets values on UI controls to the current values stored with the global optionVars
+//	Any other UI values will remain unchanged
+global proc MRS_FlexiChainSingle_refreshUpVectorUI()
+{
+	// Global optionVar names
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeRange;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_StartTime;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_EndTime;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeStep;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_DebugTolerance;
+
+	// Global control names
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_RadioCollection_TimeRange;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_RadioButton_TimeSlider;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_RadioButton_StartEnd;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_StartTime;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_EndTime;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_TimeStep;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_DebugTolerance;
+
+	// Current values
+	int $currentTimeRangeIndex = `optionVar -q $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeRange`;
+	float $currentStartTime = `optionVar -q $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_StartTime`;
+	float $currentEndTime = `optionVar -q $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_EndTime`;
+	float $currentTimeStep = `optionVar -q $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeStep`;
+	float $currentDebugTolerance = `optionVar -q $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_DebugTolerance`;
+
+	if ($currentTimeRangeIndex == 0)
+	{
+		radioCollection -e -select $MRS_FlexiChainSingle_DebugUpVectorUI_RadioButton_TimeSlider $MRS_FlexiChainSingle_DebugUpVectorUI_RadioCollection_TimeRange;
+	}
+	else if ($currentTimeRangeIndex == 1)
+	{
+		radioCollection -e -select $MRS_FlexiChainSingle_DebugUpVectorUI_RadioButton_StartEnd $MRS_FlexiChainSingle_DebugUpVectorUI_RadioCollection_TimeRange;
+	}
+
+	floatField -e -value $currentStartTime $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_StartTime;
+	floatField -e -value $currentEndTime $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_EndTime;
+	floatField -e -value $currentTimeStep $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_TimeStep;
+	floatField -e -value $currentDebugTolerance $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_DebugTolerance;
+}
+
+
+//	Description
+//	-----------
+//	Sets up the global optionVar values for the UI
+global proc MRS_FlexiChainSingle_createDebugUpVectorUIDefaultSettings()
+{
+	// Global optionVar names
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeRange;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_StartTime;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_EndTime;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeStep;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_DebugTolerance;
+
+	// Global values
+	global int $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultTimeRangeIndex;
+	global float $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultStartTime;
+	global float $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultEndTime;
+	global float $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultTimeStep;
+	global float $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultDebugTolerance;
+
+	// Setup optionVars
+	if (!`optionVar -exists $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeRange`)
+	{
+		optionVar -intValue $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeRange $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultTimeRangeIndex;
+	}
+
+	if (!`optionVar -exists $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_StartTime`)
+	{
+		optionVar -floatValue $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_StartTime $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultStartTime;
+	}
+
+	if (!`optionVar -exists $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_EndTime`)
+	{
+		optionVar -floatValue $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_EndTime $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultEndTime;
+	}
+
+	if (!`optionVar -exists $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeStep`)
+	{
+		optionVar -floatValue $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeStep $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultTimeStep;
+	}
+
+	if (!`optionVar -exists $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_DebugTolerance`)
+	{
+		optionVar -floatValue $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_DebugTolerance $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultDebugTolerance;
+	}
+}
+
+
+//	Description
+//	-----------
+//	Resets the global optionVar values to their defaults and updates the UI to reflect any changes
+global proc MRS_FlexiChainSingle_resetDebugUpVectorUIDefaultSettings()
+{
+	// Global optionVar names
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeRange;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_StartTime;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_EndTime;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeStep;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_DebugTolerance;
+
+	// Global values
+	global int $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultTimeRangeIndex;
+	global float $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultStartTime;
+	global float $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultEndTime;
+	global float $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultTimeStep;
+	global float $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultDebugTolerance;
+
+	// Set optionVars
+	optionVar -intValue $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeRange $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultTimeRangeIndex;
+	optionVar -floatValue $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_StartTime $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultStartTime;
+	optionVar -floatValue $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_EndTime $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultEndTime;
+	optionVar -floatValue $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeStep $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultTimeStep;
+	optionVar -floatValue $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_DebugTolerance $MRS_FlexiChainSingle_DebugUpVectorUI_Value_DefaultDebugTolerance;
+
+	// Refresh the UI
+	MRS_FlexiChainSingle_refreshUpVectorUI();
+}
+
+
+global proc MRS_FlexiChainSingle_saveDebugUpVectorUICustomSettings()
+{
+	// Global optionVar names
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeRange;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_StartTime;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_EndTime;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeStep;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_DebugTolerance;
+
+	// Global control names
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_RadioButton_TimeSlider;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_RadioButton_StartEnd;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_StartTime;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_EndTime;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_TimeStep;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_DebugTolerance;
+
+	// Current control values
+	int $currentTimeRangeIndex;
+	if (`radioButton -q -select $MRS_FlexiChainSingle_DebugUpVectorUI_RadioButton_TimeSlider`)
+	{
+		$currentTimeRangeIndex = 0;
+	}
+	else
+	{
+		$currentTimeRangeIndex = 1;
+	}
+	float $currentStartTime = `floatField -q -value $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_StartTime`;
+	float $currentEndTime = `floatField -q -value $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_EndTime`;
+	float $currentTimeStep = `floatField -q -value $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_TimeStep`;
+	float $currentDebugTolerance = `floatField -q -value $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_DebugTolerance`;
+
+	// Set optionVars
+	optionVar -intValue $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeRange $currentTimeRangeIndex;
+	optionVar -floatValue $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_StartTime $currentStartTime;
+	optionVar -floatValue $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_EndTime $currentEndTime;
+	optionVar -floatValue $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_TimeStep $currentTimeStep;
+	optionVar -floatValue $MRS_FlexiChainSingle_DebugUpVectorUI_OptionVar_DebugTolerance $currentDebugTolerance;
+}
+
+
+//	Description
+//	-----------
+//	This function determines the frames at which instabilities exist for the orient data of the curve
+//	The tolerance value is used to limit the range in which the system is considered unstable
+//	The window is updated to display the results of this procedure
+global proc MRS_FlexiChainSingle_debugUpVector(string $shapeNodeName)
+{
+	// Global control names
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_RadioButton_TimeSlider;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_RadioButton_StartEnd;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_StartTime;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_EndTime;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_TimeStep;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_DebugTolerance;
+	global string $MRS_FlexiChainSingle_DebugUpVectorUI_ScrollField_Ouput;
+
+	if (!`window -exists $MRS_FlexiChainSingle_DebugUpVectorUI` || `window -q -docTag $MRS_FlexiChainSingle_DebugUpVectorUI` != $shapeNodeName)
+	{
+		return;
+	}
+
+	// Retrieve values from window
+	float $startTime;
+	float $endTime;
+	float $timeStep = `floatField -q -value $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_TimeStep`;
+	float $debugTolerance = `floatField -q -value $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_DebugTolerance`;
+
+	if (`radioButton -q -select $MRS_FlexiChainSingle_DebugUpVectorUI_RadioButton_TimeSlider`)
+	{
+		$startTime = `playbackOptions -q -minTime`;
+		$endTime = `playbackOptions -q -maxTime`;
+	}
+	else
+	{
+		$startTime = `floatField -q -value $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_StartTime`;
+		$endTime = `floatField -q -value $MRS_FlexiChainSingle_DebugUpVectorUI_FloatField_EndTime`;
+	}
+
+	// Validate data
+	if ($timeStep < 0.01)
+	{
+		error "The \"time step\" parameter must be given a value greater or equal to 0.01 .";
+		return;
+	}
+
+	if ($endTime < $startTime)
+	{
+		error "The \"end time\" parameter must be given a value greater than the \"start time\" parameter.";
+		return;
+	}
+
+	// Query stability
+	string $normalStabilityStr;
+	string $counterTwistStabilityStr;
+
+	float $iterTime = $startTime;
+	float $stabilityThreshold = 1.0 - $debugTolerance;
+	int $isNormalStable = 1;
+	int $isCounterTwistStable = 1;
+
+	while ($iterTime <= $endTime)
+	{
+		float $normalStability = `FlexiChainSingleStability -time $iterTime -q -normal $shapeNodeName`;
+		$normalStability = `abs $normalStability`;
+		float $counterTwistStability = `FlexiChainSingleStability -time $iterTime -q -counterTwist $shapeNodeName`;
+		$counterTwistStability = `abs $counterTwistStability`;
+
+		if ($normalStability >= $stabilityThreshold)
+		{
+			// Set the early time (ie. we have gone from stable to unstable)
+			if ($isNormalStable)
+			{
+				if (size($normalStabilityStr)) { $normalStabilityStr += ", "; }
+				$normalStabilityStr += ("[" + string($iterTime) + "-");
+				$isNormalStable = 0;
+			}
+		}
+		else
+		{
+			// Set the late time (ie. we have gone from unstable to stable)
+			if (!$isNormalStable)
+			{
+				$normalStabilityStr += (string($iterTime - $timeStep) + "]");
+				$isNormalStable = 1;
+			}
+		}
+
+		if ($counterTwistStability >= $stabilityThreshold)
+		{
+			// Set the early time
+			if ($isCounterTwistStable)
+			{
+				if (size($counterTwistStabilityStr)) { $counterTwistStabilityStr += ", "; }
+				$counterTwistStabilityStr += ("[" + string($iterTime) + "-");
+				$isCounterTwistStable = 0;
+			}
+		}
+		else
+		{
+			// Set the late time
+			if (!$isCounterTwistStable)
+			{
+				$counterTwistStabilityStr += (string($iterTime - $timeStep) + "]");
+				$isCounterTwistStable = 1;
+			}
+		}
+
+		$iterTime += $timeStep;
+	}
+
+	// If the end time is unstable, set the final late time
+	if (!$isNormalStable)
+	{
+		$normalStabilityStr += (string($iterTime - $timeStep) + "]");
+	}
+	if (!$isCounterTwistStable)
+	{
+		$counterTwistStabilityStr += (string($iterTime - $timeStep) + "]");
+	}
+
+	// Update the window
+	string $scrollFieldNormalText = "\n\tNormal (0) Instability\n\t-----------------------------------------------------\n\tFrames : ";
+	string $scrollFieldCounterTwistText = "\n\n\n\tCounter-Twist (1) Instability\n\t-----------------------------------------------------\n\tFrames : ";
+	if (size($normalStabilityStr)) { $scrollFieldNormalText += $normalStabilityStr; }
+	else { $scrollFieldNormalText += "[]"; }
+	if (size($counterTwistStabilityStr)) { $scrollFieldCounterTwistText += $counterTwistStabilityStr; }
+	else { $scrollFieldCounterTwistText += "[]"; }
+
+	scrollField -e -text ($scrollFieldNormalText + $scrollFieldCounterTwistText) $MRS_FlexiChainSingle_DebugUpVectorUI_ScrollField_Ouput;
+}

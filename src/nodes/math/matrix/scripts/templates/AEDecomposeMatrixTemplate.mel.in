@@ -1,0 +1,48 @@
+// ------ AE Template ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc AE${NODE_NAME_PREFIX}DecomposeMatrixTemplate( string $nodeName )
+{
+    editorTemplate -beginScrollLayout;
+
+    editorTemplate -beginLayout "Inputs" -collapse 0;
+
+        MRS_AEspacer();
+
+        editorTemplate -label "Input" -addControl "input";
+
+        MRS_AEspacer();
+
+        editorTemplate -label "Rotation Order" -addControl "rotationOrder";
+
+        MRS_AEspacer();
+
+    editorTemplate -endLayout;
+
+    editorTemplate -beginLayout "Outputs" -collapse 1;
+
+        MRS_AEspacer();
+        
+        editorTemplate -label "Output Translation" -addControl "outputTranslation";
+
+        MRS_AEspacer();
+
+        editorTemplate -label "Output Rotation" -addControl "outputRotation";
+
+        MRS_AEspacer();
+
+        editorTemplate -label "Output Scale" -addControl "outputScale";
+
+        MRS_AEspacer();
+
+        editorTemplate -label "Output Quaternion" -addControl "outputQuaternion";
+
+        MRS_AEspacer();
+
+    editorTemplate -endLayout;
+
+    // Defaults
+    AEdependNodeTemplate $nodeName;
+    editorTemplate -addExtraControls;
+
+    editorTemplate -endScrollLayout;
+}

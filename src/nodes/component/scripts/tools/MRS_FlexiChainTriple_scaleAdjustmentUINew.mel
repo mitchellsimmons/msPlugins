@@ -1,0 +1,156 @@
+source "MRS_rampTemplate";
+
+// ------ Scale Adjustment Window - New -------------------------------------------------------------------------------------------------------------------------------------------
+
+// Because the window is going to be reparented to a workspace control, its controls must be assigned constant names for the callbacks to work
+global string $MRS_FlexiChainTriple_ScaleAdjustmentUI_WorkspaceControl = "MRS_FlexiChainTriple_ScaleAdjustmentUI_WorkspaceControl";
+global string $MRS_FlexiChainTriple_ScaleAjustmentUI = "MRS_FlexiChainTriple_ScaleAjustmentUI";
+global string $MRS_FlexiChainTriple_ScaleAjustmentUI_FormLayout = "MRS_FlexiChainTriple_ScaleAjustmentUI_FormLayout";
+global string $MRS_FlexiChainTriple_ScaleAjustmentUI_GradientControl = "MRS_FlexiChainTriple_ScaleAjustmentUI_GradientControl";
+global string $MRS_FlexiChainTriple_ScaleAjustmentUI_AttrField_SelectedPosition = "MRS_FlexiChainTriple_ScaleAjustmentUI_AttrField_SelectedPosition";
+global string $MRS_FlexiChainTriple_ScaleAjustmentUI_AttrField_SelectedValue = "MRS_FlexiChainTriple_ScaleAjustmentUI_AttrField_SelectedValue";
+global string $MRS_FlexiChainTriple_ScaleAjustmentUI_AttrEnum_SelectedInterp = "MRS_FlexiChainTriple_ScaleAjustmentUI_AttrEnum_SelectedInterp";
+
+global proc MRS_FlexiChainTriple_scaleAdjustmentUINew(string $nodeManipPlugName)
+{
+	// Global values
+	global int $MRS_Ramp_Value_OptionVarIndex;
+
+	// Global controls
+	global string $MRS_FlexiChainTriple_ScaleAjustmentUI;
+	global string $MRS_FlexiChainTriple_ScaleAjustmentUI_FormLayout;
+	global string $MRS_FlexiChainTriple_ScaleAjustmentUI_GradientControl;
+	global string $MRS_FlexiChainTriple_ScaleAjustmentUI_AttrField_SelectedPosition;
+	global string $MRS_FlexiChainTriple_ScaleAjustmentUI_AttrField_SelectedValue;
+	global string $MRS_FlexiChainTriple_ScaleAjustmentUI_AttrEnum_SelectedInterp;
+
+	string $buffer[];
+	tokenize($nodeManipPlugName, ".", $buffer);
+	string $nodeName = $buffer[0];
+	string $rampAttrName = "scaleAdjustmentRamp";
+	string $rampNodeAttrName = $nodeManipPlugName + "." + $rampAttrName;
+
+	if (`window -exists $MRS_FlexiChainTriple_ScaleAjustmentUI`)
+	{
+		deleteUI $MRS_FlexiChainTriple_ScaleAjustmentUI;
+		//windowPref -remove $MRS_FlexiChainTriple_ScaleAjustmentUI;
+	}
+
+	// Build an optionVar which will be used to set the initial control points of the gradientControl
+	int $elementIndices[] = `getAttr -multiIndices $rampNodeAttrName`;
+	if (size($elementIndices) == 0)
+	{
+		// Force an element plug into existence
+		$elementIndices = {0};
+		float $controlPointValues[] = `getAttr ($rampNodeAttrName + "[0]")`;
+		optionVar -stringValueAppend ("MRS_rampOptionVar" + (string)$MRS_Ramp_Value_OptionVarIndex) 
+			((string)$controlPointValues[1] + "," + (string)$controlPointValues[0] + "," + (string)$controlPointValues[2]);
+	}
+	else
+	{
+		// Retrieve values for each element plug
+		for ($i = 0; $i <= $elementIndices[size($elementIndices) - 1]; ++$i)
+		{
+			float $controlPointValues[] = `getAttr ($rampNodeAttrName + "[" + (string)$i + "]")`;
+			optionVar -stringValueAppend ("MRS_rampOptionVar" + (string)$MRS_Ramp_Value_OptionVarIndex) 
+				((string)$controlPointValues[1] + "," + (string)$controlPointValues[0] + "," + (string)$controlPointValues[2]);
+		}
+	}
+
+	// Build UI
+	window -widthHeight 1100 300 -title $rampNodeAttrName $MRS_FlexiChainTriple_ScaleAjustmentUI;
+
+	formLayout $MRS_FlexiChainTriple_ScaleAjustmentUI_FormLayout;
+
+		gradientControlNoAttr -optionVar ("MRS_rampOptionVar" + (string)$MRS_Ramp_Value_OptionVarIndex) $MRS_FlexiChainTriple_ScaleAjustmentUI_GradientControl;
+		
+		$columnLayout_settings = `columnLayout -adj 1 -rowSpacing 7 -width 403`;
+
+			frameLayout -label "Control Point" -collapsable true -backgroundShade true -marginHeight 7;
+
+				columnLayout -rowSpacing 7 -adj 1;
+
+					attrFieldSliderGrp -label "Selected Position " -at ($rampNodeAttrName + "[0]." + $rampAttrName + "_Position") 
+						-step 0.001 $MRS_FlexiChainTriple_ScaleAjustmentUI_AttrField_SelectedPosition;
+					attrFieldSliderGrp -label "Selected Value " -at ($rampNodeAttrName + "[0]." + $rampAttrName + "_FloatValue") 
+						-step 0.001 $MRS_FlexiChainTriple_ScaleAjustmentUI_AttrField_SelectedValue;
+
+					columnLayout -columnAttach "left" 58;
+						attrEnumOptionMenu -label "Selected Interp "-at ($rampNodeAttrName + "[0]." + $rampAttrName + "_Interp") 
+							$MRS_FlexiChainTriple_ScaleAjustmentUI_AttrEnum_SelectedInterp;
+					setParent ..;
+					
+				setParent ..;
+
+			setParent ..;
+
+			frameLayout -label "Adjustments" -collapsable true -backgroundShade true -marginHeight 7;
+
+				columnLayout -rowSpacing 7 -adj 1;
+
+					// This layout has been designed to replicate an attrFieldGrp
+					// There is an issue when multiple attrFieldGrps are connected to a single attribute accross seperate UIs, affecting one control does not update the others
+					// Instead we will use seperate controls for each child attribute as floatFields do not have this issue
+					rowLayout -nc 4 -columnWidth4 137 80 80 80 -columnAttach4 "left" "left" "left" "left" -columnOffset4 0 3 3 3;
+						text -label "Scale" -align "right" -width 137;
+						string $floatField_valueX = `floatField -step 0.01 -precision 3 -width 80`;
+						connectControl $floatField_valueX ($nodeManipPlugName + ".scaleAdjustmentValueX");
+						string $floatField_valueY = `floatField -step 0.01 -precision 3 -width 80`;
+						connectControl $floatField_valueY ($nodeManipPlugName + ".scaleAdjustmentValueY");
+						string $floatField_valueZ = `floatField -step 0.01 -precision 3 -width 80`;
+						connectControl $floatField_valueZ ($nodeManipPlugName + ".scaleAdjustmentValueZ");
+					setParent ..;
+
+					attrFieldSliderGrp -label "Offset " -at ($nodeManipPlugName + ".scaleAdjustmentOffset") -step 0.001;
+					attrFieldSliderGrp -label "Falloff Distance " -at ($nodeManipPlugName + ".scaleAdjustmentFalloffDistance") -step 0.001;
+					attrEnumOptionMenuGrp -label "Falloff Mode " -at ($nodeManipPlugName + ".scaleAdjustmentFalloffMode");
+					string $checkBoxGrp_repeat = `checkBoxGrp -label "Repeat "`;
+					connectControl -index 2 $checkBoxGrp_repeat ($nodeManipPlugName + ".scaleAdjustmentRepeat");
+
+				setParent ..;
+
+			setParent ..;
+
+		setParent ..;
+
+		formLayout -edit
+			-attachForm $MRS_FlexiChainTriple_ScaleAjustmentUI_GradientControl "left" 5
+			-attachForm $MRS_FlexiChainTriple_ScaleAjustmentUI_GradientControl "top" 9
+			-attachForm $MRS_FlexiChainTriple_ScaleAjustmentUI_GradientControl "bottom" 9
+			-attachControl $MRS_FlexiChainTriple_ScaleAjustmentUI_GradientControl "right" 4 $columnLayout_settings
+			-attachForm $columnLayout_settings "top"    9
+			-attachForm $columnLayout_settings "bottom" 9
+			-attachForm $columnLayout_settings "right"  5
+			$MRS_FlexiChainTriple_ScaleAjustmentUI_FormLayout;
+
+	setParent ..;
+
+	// Delete the optionVar and increment the index (the reason for this is explained in the attrField change callback)
+	optionVar -remove ("MRS_rampOptionVar" + (string)$MRS_Ramp_Value_OptionVarIndex);
+	++$MRS_Ramp_Value_OptionVarIndex;
+
+	// Add callbacks and scriptJobs
+	string $rampCurrentKeyChangedCmd = "MRS_ramp_AEkeyChangedCallback " + $rampNodeAttrName + " " + $MRS_FlexiChainTriple_ScaleAjustmentUI_GradientControl + " " + 
+		$MRS_FlexiChainTriple_ScaleAjustmentUI_AttrField_SelectedPosition + " " + $MRS_FlexiChainTriple_ScaleAjustmentUI_AttrField_SelectedValue + " " + $MRS_FlexiChainTriple_ScaleAjustmentUI_AttrEnum_SelectedInterp;
+	gradientControlNoAttr -e -currentKeyChanged $rampCurrentKeyChangedCmd $MRS_FlexiChainTriple_ScaleAjustmentUI_GradientControl;
+
+	string $rampDragCmd = "MRS_ramp_AEdragCallback " + $rampNodeAttrName + " " + $MRS_FlexiChainTriple_ScaleAjustmentUI_GradientControl;
+	gradientControlNoAttr -e -dragCommand $rampDragCmd $MRS_FlexiChainTriple_ScaleAjustmentUI_GradientControl;
+
+	// When the mouse is released we also ensure the AE is refreshed as this window is essentially acting as a duplicate to one of the AE gradientControls
+	string $rampChangeCmd = "MRS_ramp_AEchangeCallback; updateAE " + $nodeName;
+	gradientControlNoAttr -e -changeCommand $rampChangeCmd $MRS_FlexiChainTriple_ScaleAjustmentUI_GradientControl;
+
+	// As with the mouse release, we ensure the AE is refreshed when one of the attrFields is updated
+	string $attrChangedCmd = "MRS_rampAttrField_AEchangeCallback " + $rampNodeAttrName + " " + $MRS_FlexiChainTriple_ScaleAjustmentUI_GradientControl + "; updateAE " + $nodeName;
+	attrFieldSliderGrp -e -changeCommand $attrChangedCmd $MRS_FlexiChainTriple_ScaleAjustmentUI_AttrField_SelectedPosition;
+	attrFieldSliderGrp -e -changeCommand $attrChangedCmd $MRS_FlexiChainTriple_ScaleAjustmentUI_AttrField_SelectedValue;
+	attrEnumOptionMenu -e -changeCommand $attrChangedCmd $MRS_FlexiChainTriple_ScaleAjustmentUI_AttrEnum_SelectedInterp;
+
+	// Because only one instance of the window can exist, the scriptJobs will never duplicate and will always be removed with the window when it is closed
+	string $undoRedoCmd = "MRS_ramp_AEundoRedoCallback " + $rampNodeAttrName + " " + $MRS_FlexiChainTriple_ScaleAjustmentUI_GradientControl;
+	scriptJob -parent $MRS_FlexiChainTriple_ScaleAjustmentUI -event "Undo" $undoRedoCmd;
+	scriptJob -parent $MRS_FlexiChainTriple_ScaleAjustmentUI -event "Redo" $undoRedoCmd;
+
+	python("import MRS_FlexiChainTriple_scaleAdjustmentUIDock\nMRS_FlexiChainTriple_scaleAdjustmentUIDock.scaleAdjustmentDockUI()");
+}

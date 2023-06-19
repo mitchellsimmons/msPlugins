@@ -1,0 +1,354 @@
+// ------ Scale Adjustment Tool Commands -------------------------------------------------------------------------------------------------------------------------
+
+//	Description
+//	-----------
+//	Procedure toggles the state of the FlexiChainDoubleScaleAdjustmentContext
+//	If the context is not yet active, the given node will be selected so that it can be recognised by the FlexiChainDoubleScaleAdjustmentContext
+//	If the context is already active, the default select context is activated
+global proc MRS_FlexiChainDouble_toggleScaleAdjustmentTool(string $nodeName)
+{
+	if (`currentCtx` == "FlexiChainDoubleScaleAdjustmentContext1")
+	{
+		setToolTo selectSuperContext;
+	}
+	else
+	{
+		// Component mode will be activated by the context's toolOnSetup() function, hiliting the selected node and allowing it to be recognised
+		select -add $nodeName;
+		setToolTo FlexiChainDoubleScaleAdjustmentContext1;
+	}
+}
+
+
+//	Description
+//	-----------
+//	Procedure selects the given node so that it can be recognised by the FlexiChainDoubleScaleAdjustmentContext
+// 	If the context is not yet active, it will be activated
+global proc MRS_FlexiChainDouble_addToScaleAdjustmentTool(string $nodeName)
+{
+	// We must first ensure the tool is not active before selecting the additional node
+	// - MPxContext::toolOffCleanup() will be called upon refreshing the context, this function has been set up to change the selectMode to object selection
+	// - Doing so will add any hilited nodes to the active selection and remove any non-hilited nodes which were already in it
+	setToolTo selectSuperContext;
+	select -add $nodeName;
+	setToolTo FlexiChainDoubleScaleAdjustmentContext1; // Refresh context
+}
+
+
+//	Description
+//	-----------
+//	Procedure unhilites the given node, ensuring it is ignored by the FlexiChainDoubleScaleAdjustmentContext
+//	Unhiliting is required instead of deselecting, as activation of the context enables component selection mode which hilites selected nodes and removes them from the active selection
+//	This procedure will not deactivate the current context (ie. if there are no hilited nodes after its execution, the context will still remain active)
+global proc MRS_FlexiChainDouble_removeFromScaleAdjustmentTool(string $nodeName)
+{
+	if (`currentCtx` == "FlexiChainDoubleScaleAdjustmentContext1")
+	{
+		// Ensure both the parent transform and shape are unhilited as either will result in the instantiation of manipulators
+		string $parentNodeName[] = `listRelatives -parent $nodeName`;
+		hilite -unHilite $parentNodeName;
+		hilite -unHilite $nodeName;
+		setToolTo FlexiChainDoubleScaleAdjustmentContext1; // Refresh context
+	}
+}
+
+
+// ------ Scale Adjustment Manip Commands ----------------------------------------------------------------------------------------------------------------
+
+global proc MRS_FlexiChainDouble_resetScaleAdjustmentManip(string $nodeManipPlugName)
+{
+	// Retrieve attributes
+	string $rampNodeAttrName = $nodeManipPlugName + ".scaleAdjustmentRamp";
+	string $valueNodeAttrName = $nodeManipPlugName + ".scaleAdjustmentValue";
+	string $offsetNodeAttrName = $nodeManipPlugName + ".scaleAdjustmentOffset";
+	string $falloffModeNodeAttrName = $nodeManipPlugName + ".scaleAdjustmentFalloffMode";
+	string $falloffDistanceNodeAttrName = $nodeManipPlugName + ".scaleAdjustmentFalloffDistance";
+
+	// Reset ramp attribute
+	int $rampElementIndices[] = `getAttr -multiIndices $rampNodeAttrName`;
+	for ($i = 0; $i < size($rampElementIndices); ++$i)
+		removeMultiInstance -break true ($rampNodeAttrName + "[" + $rampElementIndices[$i] + "]");
+
+	// Ensure an initial ramp control point exists (otherwise we get a crash)
+	getAttr ($rampNodeAttrName + "[0].scaleAdjustmentRamp_Position");
+
+	// Reset other attribute
+	setAttr $valueNodeAttrName 1.0 1.0 1.0;
+	setAttr $offsetNodeAttrName 0.0;
+	setAttr $falloffModeNodeAttrName 0;
+	setAttr $falloffDistanceNodeAttrName 1.0;
+}
+
+
+// ------ Twist Adjustment Tool Commands -------------------------------------------------------------------------------------------------------------------------
+
+//	Description
+//	-----------
+//	Procedure toggles the state of the FlexiChainDoubleTwistAdjustmentContext
+//	If the context is not yet active, the given node will be selected so that it can be recognised by the FlexiChainDoubleTwistAdjustmentContext
+//	If the context is already active, the default select context is activated
+global proc MRS_FlexiChainDouble_toggleTwistAdjustmentTool(string $nodeName)
+{
+	if (`currentCtx` == "FlexiChainDoubleTwistAdjustmentContext1")
+	{
+		setToolTo selectSuperContext;
+	}
+	else
+	{
+		// Component mode will be activated by the context's toolOnSetup() function, hiliting the selected node and allowing it to be recognised
+		select -add $nodeName;
+		setToolTo FlexiChainDoubleTwistAdjustmentContext1;
+	}
+}
+
+
+//	Description
+//	-----------
+//	Procedure selects the given node so that it can be recognised by the FlexiChainDoubleTwistAdjustmentContext
+// 	If the context is not yet active, it will be activated
+global proc MRS_FlexiChainDouble_addToTwistAdjustmentTool(string $nodeName)
+{
+	// We must first ensure the tool is not active before selecting the additional node
+	// - MPxContext::toolOffCleanup() will be called upon refreshing the context, this function has been set up to change the selectMode to object selection
+	// - Doing so will add any hilited nodes to the active selection and remove any non-hilited nodes which were already in it
+	setToolTo selectSuperContext;
+	select -add $nodeName;
+	setToolTo FlexiChainDoubleTwistAdjustmentContext1; // Refresh context
+}
+
+
+//	Description
+//	-----------
+//	Procedure unhilites the given node, ensuring it is ignored by the FlexiChainDoubleTwistAdjustmentContext
+//	Unhiliting is required instead of deselecting, as activation of the context enables component selection mode which hilites selected nodes and removes them from the active selection
+//	This procedure will not deactivate the current context (ie. if there are no hilited nodes after its execution, the context will still remain active)
+global proc MRS_FlexiChainDouble_removeFromTwistAdjustmentTool(string $nodeName)
+{
+	if (`currentCtx` == "FlexiChainDoubleTwistAdjustmentContext1")
+	{
+		// Ensure both the parent transform and shape are unhilited as either will result in the instantiation of manipulators
+		string $parentNodeName[] = `listRelatives -parent $nodeName`;
+		hilite -unHilite $parentNodeName;
+		hilite -unHilite $nodeName;
+		setToolTo FlexiChainDoubleTwistAdjustmentContext1; // Refresh context
+	}
+}
+
+
+// ------ Twist Adjustment Manip Commands ----------------------------------------------------------------------------------------------------------------
+
+global proc MRS_FlexiChainDouble_resetTwistAdjustmentManip(string $nodeManipPlugName)
+{
+	// Retrieve attributes
+	string $rampNodeAttrName = $nodeManipPlugName + ".twistAdjustmentRamp";
+	string $valueNodeAttrName = $nodeManipPlugName + ".twistAdjustmentValue";
+	string $offsetNodeAttrName = $nodeManipPlugName + ".twistAdjustmentOffset";
+	string $falloffModeNodeAttrName = $nodeManipPlugName + ".twistAdjustmentFalloffMode";
+	string $falloffDistanceNodeAttrName = $nodeManipPlugName + ".twistAdjustmentFalloffDistance";
+
+	// Reset ramp attribute
+	int $rampElementIndices[] = `getAttr -multiIndices $rampNodeAttrName`;
+	for ($i = 0; $i < size($rampElementIndices); ++$i)
+		removeMultiInstance -break true ($rampNodeAttrName + "[" + $rampElementIndices[$i] + "]");
+
+	// Ensure an initial ramp control point exists (otherwise we get a crash)
+	getAttr ($rampNodeAttrName + "[0].twistAdjustmentRamp_Position");
+
+	// Reset other attribute
+	setAttr $valueNodeAttrName 0.0;
+	setAttr $offsetNodeAttrName 0.0;
+	setAttr $falloffModeNodeAttrName 0;
+	setAttr $falloffDistanceNodeAttrName 1.0;
+}
+
+
+// ------ Up Vector Tool Commands --------------------------------------------------------------------------------------------------------------------------------
+
+//	Description
+//	-----------
+//	Procedure toggles the state of the FlexiChainDoubleUpVectorContext
+//	If the context is not yet active, the given node will be selected so that it can be recognised by the FlexiChainDoubleUpVectorContext
+//	If the context is already active, the default select context is activated
+global proc MRS_FlexiChainDouble_toggleUpVectorTool(string $nodeName)
+{
+	if (`currentCtx` == "FlexiChainDoubleUpVectorContext1")
+	{
+		setToolTo selectSuperContext;
+	}
+	else
+	{
+		// Component mode will be activated by the context's toolOnSetup() function, hiliting the selected node and allowing it to be recognised
+		select -add $nodeName;
+		setToolTo FlexiChainDoubleUpVectorContext1;
+	}
+}
+
+
+//	Description
+//	-----------
+//	Procedure selects the given node so that it can be recognised by the FlexiChainDoubleUpVectorContext
+// 	If the context is not yet active, it will be activated
+global proc MRS_FlexiChainDouble_addToUpVectorTool(string $nodeName)
+{
+	// We must first ensure the tool is not active before selecting the additional node
+	// - MPxContext::toolOffCleanup() will be called upon refreshing the context, this function has been set up to change the selectMode to object selection
+	// - Doing so will add any hilited nodes to the active selection and remove any non-hilited nodes which were already in it
+	setToolTo selectSuperContext;
+	select -add $nodeName;
+	setToolTo FlexiChainDoubleUpVectorContext1; // Refresh context
+}
+
+
+//	Description
+//	-----------
+//	Procedure unhilites the given node, ensuring it is ignored by the FlexiChainDoubleUpVectorContext
+//	Unhiliting is required instead of deselecting, as activation of the context enables component selection mode which hilites selected nodes and removes them from the active selection
+//	This procedure will not deactivate the current context (ie. if there are no hilited nodes after its execution, the context will still remain active)
+global proc MRS_FlexiChainDouble_removeFromUpVectorTool(string $nodeName)
+{
+	if (`currentCtx` == "FlexiChainDoubleUpVectorContext1")
+	{
+		// Ensure both the parent transform and shape are unhilited as either will result in the instantiation of manipulators
+		string $parentNodeName[] = `listRelatives -parent $nodeName`;
+		hilite -unHilite $parentNodeName;
+		hilite -unHilite $nodeName;
+		setToolTo FlexiChainDoubleUpVectorContext1; // Refresh context
+	}
+}
+
+
+// ------ Up Vector Tool Manip Commands -------------------------------------------------------------------------------------------------------------------------
+
+global proc MRS_FlexiChainDouble_toggleUpVectorManipState(string $manipNodePlugName)
+{
+	// Plug corresponds to a compound, get the correct child
+	string $buffer[];
+	int $numTokens = tokenize($manipNodePlugName, ".", $buffer);
+	string $nodeName = $buffer[0];
+	stringArrayRemoveAtIndex(0, $buffer);
+	string $compoundPlugName = stringArrayToString($buffer, ".");
+	string $stateNodePlugName = $manipNodePlugName + "." + $compoundPlugName + "State";
+
+	int $currentToggleState = `getAttr $stateNodePlugName`;
+	setAttr $stateNodePlugName ($currentToggleState == 0);
+}
+
+
+global proc MRS_FlexiChainDouble_setUpVectorManipToCurrent(string $manipNodePlugName)
+{
+	// Plug corresponds to a compound, get the correct child
+	string $buffer[];
+	int $numTokens = tokenize($manipNodePlugName, ".", $buffer);
+	string $nodeName = $buffer[0];
+	stringArrayRemoveAtIndex(0, $buffer);
+	string $compoundPlugName = stringArrayToString($buffer, ".");
+
+	// Retrieve the current up-vector
+	string $upVectorNodePlugName = $nodeName + "." + "upVector";
+	float $upVector[] = `getAttr $upVectorNodePlugName`;
+
+	// Set the override plug
+	string $overrideNodePlugName = $manipNodePlugName + "." + $compoundPlugName + "Direction";
+	setAttr $overrideNodePlugName -type double3 $upVector[0] $upVector[1] $upVector[2];
+}
+
+
+global proc MRS_FlexiChainDouble_setAllUpVectorManipKeys(string $manipNodePlugName)
+{
+	MRS_FlexiChainDouble_setUpVectorManipDirectionKey($manipNodePlugName);
+	MRS_FlexiChainDouble_setUpVectorManipStateKey($manipNodePlugName);
+}
+
+
+global proc MRS_FlexiChainDouble_setUpVectorManipDirectionKey(string $manipNodePlugName)
+{
+	// Plug corresponds to a compound, get the correct child
+	string $buffer[];
+	int $numTokens = tokenize($manipNodePlugName, ".", $buffer);
+	string $nodeName = $buffer[0];
+	stringArrayRemoveAtIndex(0, $buffer);
+	string $compoundPlugName = stringArrayToString($buffer, ".");
+	string $directionPlugName = $compoundPlugName + "." + $compoundPlugName + "Direction";
+
+	setKeyframe -attribute $directionPlugName -inTangentType linear -outTangentType linear $nodeName;
+}
+
+
+global proc MRS_FlexiChainDouble_setUpVectorManipStateKey(string $manipNodePlugName)
+{
+	// Plug corresponds to a compound, get the correct child
+	string $buffer[];
+	int $numTokens = tokenize($manipNodePlugName, ".", $buffer);
+	string $nodeName = $buffer[0];
+	stringArrayRemoveAtIndex(0, $buffer);
+	string $compoundPlugName = stringArrayToString($buffer, ".");
+	string $statePlugName = $compoundPlugName + "." + $compoundPlugName + "State";
+
+	setKeyframe -attribute $statePlugName -inTangentType linear -outTangentType step $nodeName;
+}
+
+
+global proc MRS_FlexiChainDouble_selectAllUpVectorManipKeys(string $manipNodePlugName)
+{
+	// Plug corresponds to a compound, get each child plug
+	string $buffer[];
+	int $numTokens = tokenize($manipNodePlugName, ".", $buffer);
+	string $nodeName = $buffer[0];
+	stringArrayRemoveAtIndex(0, $buffer);
+	string $compoundPlugName = stringArrayToString($buffer, ".");
+
+	string $directionXNodePlugName = $manipNodePlugName + "." + $compoundPlugName + "DirectionX";
+	string $directionYNodePlugName = $manipNodePlugName + "." + $compoundPlugName + "DirectionY";
+	string $directionZNodePlugName = $manipNodePlugName + "." + $compoundPlugName + "DirectionZ";
+	string $stateNodePlugName = $manipNodePlugName + "." + $compoundPlugName + "State";
+
+	// We cannot use the "selectKey" command for this as the node needs to be in the active selection for the UI to display the keys
+	// When we enter component selection mode, the node is removed from the active selection and added to the hilite list, therefore the only alternative is to select the animCurves
+	string $directionXAnimCurveName[] = `listConnections -destination true -type animCurve $directionXNodePlugName`;
+	string $directionYAnimCurveName[] = `listConnections -destination true -type animCurve $directionYNodePlugName`;
+	string $directionZAnimCurveName[] = `listConnections -destination true -type animCurve $directionZNodePlugName`;
+	string $stateAnimCurveName[] = `listConnections -destination true -type animCurve $stateNodePlugName`;
+
+	if (size($directionXAnimCurveName)) { select -add $directionXAnimCurveName[0]; }
+	if (size($directionYAnimCurveName)) { select -add $directionYAnimCurveName[0]; }
+	if (size($directionZAnimCurveName)) { select -add $directionZAnimCurveName[0]; }
+	if (size($stateAnimCurveName)) { select -add $stateAnimCurveName[0]; }
+}
+
+
+global proc MRS_FlexiChainDouble_selectUpVectorManipDirectionKeys(string $manipNodePlugName)
+{
+	// Plug corresponds to a compound, get the correct children
+	string $buffer[];
+	int $numTokens = tokenize($manipNodePlugName, ".", $buffer);
+	string $nodeName = $buffer[0];
+	stringArrayRemoveAtIndex(0, $buffer);
+	string $compoundPlugName = stringArrayToString($buffer, ".");
+
+	string $directionXNodePlugName = $manipNodePlugName + "." + $compoundPlugName + "DirectionX";
+	string $directionYNodePlugName = $manipNodePlugName + "." + $compoundPlugName + "DirectionY";
+	string $directionZNodePlugName = $manipNodePlugName + "." + $compoundPlugName + "DirectionZ";
+	
+	string $directionXAnimCurveName[] = `listConnections -destination true -type animCurve $directionXNodePlugName`;
+	string $directionYAnimCurveName[] = `listConnections -destination true -type animCurve $directionYNodePlugName`;
+	string $directionZAnimCurveName[] = `listConnections -destination true -type animCurve $directionZNodePlugName`;
+
+	if (size($directionXAnimCurveName)) { select -replace $directionXAnimCurveName[0]; }
+	if (size($directionYAnimCurveName)) { select -add $directionYAnimCurveName[0]; }
+	if (size($directionZAnimCurveName)) { select -add $directionZAnimCurveName[0]; }
+}
+
+
+global proc MRS_FlexiChainDouble_selectUpVectorManipStateKeys(string $manipNodePlugName)
+{
+	// Plug corresponds to a compound, get the correct child
+	string $buffer[];
+	int $numTokens = tokenize($manipNodePlugName, ".", $buffer);
+	string $nodeName = $buffer[0];
+	stringArrayRemoveAtIndex(0, $buffer);
+	string $compoundPlugName = stringArrayToString($buffer, ".");
+	string $stateNodePlugName = $manipNodePlugName + "." + $compoundPlugName + "State";
+
+	string $stateAnimCurveName[] = `listConnections -destination true -type animCurve $stateNodePlugName`;
+	if (size($stateAnimCurveName)) { select -replace $stateAnimCurveName[0]; }
+}

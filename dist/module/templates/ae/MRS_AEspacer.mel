@@ -1,0 +1,20 @@
+// ------ AE Customisations ------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc MRS_AEspacer()
+{
+    editorTemplate -callCustom "MRS_spacer_AEnew" "MRS_spacer_AEreplace";
+}
+
+// ------ Layout Customisations ------------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc MRS_spacer_AEnew()
+{
+    rowLayout -height 2;
+    setParent ..;
+}
+
+
+global proc MRS_spacer_AEreplace()
+{
+    // No-op
+}

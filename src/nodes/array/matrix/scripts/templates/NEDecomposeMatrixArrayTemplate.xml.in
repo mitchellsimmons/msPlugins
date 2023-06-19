@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+  <using package='maya'/>
+  <using package='std'/>
+  <template name='NE${NODE_NAME_PREFIX}DecomposeMatrixArray'>
+    <attribute name='message' type='maya.message'>
+      <label>Message</label>
+    </attribute>
+    <attribute name='outputTranslation' type='maya.double3'>
+      <label>Output Translation</label>
+    </attribute>
+    <attribute name='outputRotation' type='maya.double3'>
+      <label>Output Rotation</label>
+    </attribute>
+    <attribute name='outputScale' type='maya.double3'>
+      <label>Output Scale</label>
+    </attribute>
+    <attribute name='outputQuaternion' type='maya.double4'>
+      <label>Output Quaternion</label>
+    </attribute>
+    <attribute name='input' type='maya.matrixArray'>
+      <label>Input</label>
+    </attribute>
+    <attribute name='rotationOrder' type='maya.Int32Array'>
+      <label>Rotation Order</label>
+    </attribute>
+  </template>
+  <view name='NEDefault' template='NE${NODE_NAME_PREFIX}DecomposeMatrixArray'>
+    <property name='message'/>
+    <property name='outputTranslation'/>
+    <property name='outputRotation'/>
+    <property name='outputScale'/>
+    <property name='outputQuaternion'/>
+    <property name='input'/>
+    <property name='rotationOrder'/>
+  </view>
+</templates>

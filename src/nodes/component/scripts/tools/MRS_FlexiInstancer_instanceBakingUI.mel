@@ -1,0 +1,661 @@
+// ------ Instance Baking Window -------------------------------------------------------------------------------------------------------------------------------------------
+
+// Global optionVar names
+global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_BakingMode = "MRS_FlexiInstancer_InstanceBakingUI_BakingMode";
+global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_GroupMode = "MRS_FlexiInstancer_InstanceBakingUI_GroupMode";
+global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_InputSpace = "MRS_FlexiInstancer_InstanceBakingUI_InputSpace";
+global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteInstancer = "MRS_FlexiInstancer_InstanceBakingUI_DeleteInstancer";
+global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteSourceHierarchies = "MRS_FlexiInstancer_InstanceBakingUI_DeleteSourceHierarchies";
+global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeRange = "MRS_FlexiInstancer_InstanceBakingUI_TimeRange";
+global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_StartTime = "MRS_FlexiInstancer_InstanceBakingUI_StartTime";
+global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_EndTime = "MRS_FlexiInstancer_InstanceBakingUI_EndTime";
+global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeStep = "MRS_FlexiInstancer_InstanceBakingUI_TimeStep";
+
+// Global values
+global int $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultBakingModeIndex = 1;
+global int $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultGroupModeIndex = 0;
+global int $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultInputSpaceIndex = 0;
+global int $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultDeleteInstancerState = 0;
+global int $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultDeleteSourceHierarchiesState = 0;
+global int $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultTimeRangeIndex = 0;
+global float $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultStartTime = 0.0;
+global float $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultEndTime = 24.0;
+global float $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultTimeStep = 1.0;
+
+global proc MRS_FlexiInstancer_instanceBakingUI(string $shapeNodeName)
+{
+	// Global optionVar names
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_BakingMode;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_GroupMode;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_InputSpace;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteInstancer;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteSourceHierarchies;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeRange;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_StartTime;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_EndTime;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeStep;
+
+	// Global control names
+	global string $MRS_FlexiInstancer_InstanceBakingUI = "MRS_FlexiInstancer_InstanceBakingUI"; // Static, so Maya can store preferences
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionMenu_SelectInstancer;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_BakingMode;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_Duplicates;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_Instances;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_GroupMode;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupParent;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupWorld;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupNew;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_InputSpace;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceObject;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceLocal;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceWorld;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_CheckBox_DeleteInstancer;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_CheckBox_DeleteSourceHierarchies;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_TimeRange;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_TimeSlider;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_StartEnd;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_FloatField_StartTime;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_FloatField_EndTime;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_FloatField_TimeStep;
+
+	// Retrieve connections to output attributes
+	string $instancerNodeNames[] = stringArrayCatenate(
+		`listConnections -type instancer ($shapeNodeName + ".outputWorldParticleArray")`,
+		`listConnections -type instancer ($shapeNodeName + ".outputLocalParticleArray")`);
+
+	// Ensure optionVars exist
+	MRS_FlexiInstancer_createInstanceBakingUIDefaultSettings();
+
+	// Current optionVar values
+	int $currentBakingModeIndex = `optionVar -q $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_BakingMode`;
+	int $currentGroupModeIndex = `optionVar -q $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_GroupMode`;
+	int $currentInputSpaceIndex = `optionVar -q $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_InputSpace`;
+	int $currentDeleteInstancerState = `optionVar -q $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteInstancer`;
+	int $currentDeleteSourceHierarchiesState = `optionVar -q $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteSourceHierarchies`;
+	int $currentTimeRangeIndex = `optionVar -q $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeRange`;
+	float $currentStartTime = `optionVar -q $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_StartTime`;
+	float $currentEndTime = `optionVar -q $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_EndTime`;
+	float $currentTimeStep = `optionVar -q $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeStep`;
+
+	// Callback control names
+	string $rowLayout_startTime = "MRS_FlexiInstancer_InstanceBakingUI_RowLayout_StartTime";
+	string $rowLayout_endTime = "MRS_FlexiInstancer_InstanceBakingUI_RowLayout_EndTime";
+
+	// Build window
+	if (`window -exists $MRS_FlexiInstancer_InstanceBakingUI`)
+	{
+		deleteUI $MRS_FlexiInstancer_InstanceBakingUI;
+		//windowPref -remove $MRS_FlexiInstancer_InstanceBakingUI;
+	}
+
+	window
+		-title "Instance Baking Options" -menuBar true -widthHeight 568 416 -docTag $shapeNodeName
+		$MRS_FlexiInstancer_InstanceBakingUI;
+
+	menu -label "Edit";
+		menuItem -label "Save Settings" -command "MRS_FlexiInstancer_saveInstanceBakingUICustomSettings";
+		menuItem -label "Reset Settings" -command "MRS_FlexiInstancer_resetInstanceBakingUIDefaultSettings";
+
+	string $formLayout_outerMain = `formLayout`;
+
+		// The top border gets cutoff (fix applied later)
+		string $tabLayout_main = `tabLayout -tabsVisible false`;
+		
+		// Attach the tabLayout at the given offsets
+		formLayout -e
+			-attachForm $tabLayout_main "top"    0
+			-attachForm $tabLayout_main "left"   7
+			-attachForm $tabLayout_main "bottom" 40 // Offset (7) + button height (25) + button offset (7)
+			-attachForm $tabLayout_main "right"  7
+			$formLayout_outerMain;
+			
+			string $formLayout_innerMain = `formLayout`;
+			
+				string $scrollLayout_main = `scrollLayout -childResizable true`;
+			
+				// Attach the scroll layout at the given offsets
+				formLayout -e
+					-attachForm $scrollLayout_main "top"    7
+					-attachForm $scrollLayout_main "left"   7
+					-attachForm $scrollLayout_main "bottom" 7
+					-attachForm $scrollLayout_main "right"  7
+					$formLayout_innerMain;
+					
+					columnLayout -adjustableColumn true -rowSpacing 7;
+				
+						frameLayout -label "Settings" -collapsable true -backgroundShade true -marginHeight 7;
+
+							rowLayout -numberOfColumns 3 -columnWidth3 175 115 100 -columnAttach 1 "right" 40;
+
+								text -label "Instancer :";
+								$MRS_FlexiInstancer_InstanceBakingUI_OptionMenu_SelectInstancer = `optionMenu`;
+								for ($i = 0; $i < size($instancerNodeNames); ++$i)
+									menuItem -label $instancerNodeNames[$i];
+
+							setParent ..;
+
+							rowLayout -numberOfColumns 3 -columnWidth3 175 115 100 -columnAttach 1 "right" 40;
+
+								text -label "Baking Mode :";
+								$MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_BakingMode = `radioCollection`;
+									$MRS_FlexiInstancer_InstanceBakingUI_RadioButton_Duplicates = `radioButton -label "Duplicates"`;
+									$MRS_FlexiInstancer_InstanceBakingUI_RadioButton_Instances = `radioButton -label "Instances"`;
+
+							setParent ..;
+
+							rowLayout -numberOfColumns 4 -columnWidth4 175 115 115 100 -columnAttach 1 "right" 40;
+
+								text -label "Group Under :";
+								$MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_GroupMode = `radioCollection`;
+									$MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupParent = `radioButton -label "Parent"`;
+									$MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupWorld = `radioButton -label "World"`;
+									$MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupNew = `radioButton -label "New" -width 110`;
+
+							setParent ..;
+
+							rowLayout -numberOfColumns 4 -columnWidth4 175 115 115 100 -columnAttach 1 "right" 40;
+
+								text -label "Input Space :";
+								$MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_InputSpace = `radioCollection`;
+									$MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceObject = `radioButton -label "Object"`;
+									$MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceLocal = `radioButton -label "Local"`;
+									$MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceWorld = `radioButton -label "World" -width 110`;
+
+							setParent ..;
+
+							columnLayout -adjustableColumn true -columnAttach "both" 50;
+
+								separator;
+							
+							setParent ..;
+
+							rowLayout -numberOfColumns 3 -columnWidth3 175 115 100 -columnAttach 1 "right" 40;
+
+								text -label "Cleanup :";
+								$MRS_FlexiInstancer_InstanceBakingUI_CheckBox_DeleteInstancer = `checkBox -label "Delete Instancer" -value $currentDeleteInstancerState`;
+
+							setParent ..;
+
+							rowLayout -numberOfColumns 3 -columnWidth3 175 115 100 -columnAttach 1 "right" 40;
+
+								text -label "";
+								$MRS_FlexiInstancer_InstanceBakingUI_CheckBox_DeleteSourceHierarchies = `checkBox -label "Delete Source Hierarchies" 
+									-value $currentDeleteSourceHierarchiesState`;
+
+							setParent ..;
+
+							columnLayout -adjustableColumn true -columnAttach "both" 50;
+
+								separator;
+							
+							setParent ..;
+
+							rowLayout -numberOfColumns 3 -columnWidth3 175 115 100 -columnAttach 1 "right" 40;
+
+								text -label "Time range :";
+								$MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_TimeRange = `radioCollection`;
+									$MRS_FlexiInstancer_InstanceBakingUI_RadioButton_TimeSlider = `radioButton -label "Time Slider"`;
+									$MRS_FlexiInstancer_InstanceBakingUI_RadioButton_StartEnd = `radioButton -label "Start/End" 
+										-onCommand ("disable -value false " + $rowLayout_startTime + "; disable -value false " + $rowLayout_endTime) 
+										-offCommand ("disable -value true " + $rowLayout_startTime + "; disable -value true " + $rowLayout_endTime)`;
+
+							setParent ..;
+							
+							rowLayout -numberOfColumns 3 -columnWidth3 175 115 100 -columnAttach 1 "right" 40 $rowLayout_startTime;
+
+								text -label "Start time :";
+								$MRS_FlexiInstancer_InstanceBakingUI_FloatField_StartTime = `floatField -value $currentStartTime -precision 4 -step 10.0`;
+
+							setParent ..;
+
+							rowLayout -numberOfColumns 3 -columnWidth3 175 115 100 -columnAttach 1 "right" 40 $rowLayout_endTime;
+								
+								text -label "End time :";
+								$MRS_FlexiInstancer_InstanceBakingUI_FloatField_EndTime = `floatField -value $currentEndTime -precision 4 -step 10.0`;
+
+							setParent ..;
+
+							columnLayout -adjustableColumn true -columnAttach "both" 50;
+
+								separator;
+							
+							setParent ..;
+
+							rowLayout -numberOfColumns 3 -columnWidth3 175 115 100 -columnAttach 1 "right" 40;
+								
+								text -label "Time step :";
+								$MRS_FlexiInstancer_InstanceBakingUI_FloatField_TimeStep = `floatField -value $currentTimeStep -min 0.01 -precision 4 -step 1.0`;
+
+							setParent ..;
+						setParent ..;
+					setParent ..;
+				setParent ..;
+			setParent ..;
+		setParent ..;
+		
+		string $formLayout_bottomButtons = `formLayout -numberOfDivisions 3`;
+			string $button_cacheClose = `button -height 25 -label "Bake and Close"
+				-command ("MRS_FlexiInstancer_bakeInstances " + $shapeNodeName + "; deleteUI -window " + $MRS_FlexiInstancer_InstanceBakingUI)`;
+			string $button_cache = `button -height 25 -label "Bake" 
+				-command ("MRS_FlexiInstancer_bakeInstances " + $shapeNodeName)`;
+			string $button_close = `button -height 25 -label "Close"
+				-command ("deleteUI -window " + $MRS_FlexiInstancer_InstanceBakingUI)`;
+		
+		// Attach the buttons at the given offsets
+		formLayout -e
+			-attachPosition $button_cacheClose   "left"  0 0
+			-attachPosition $button_cacheClose   "right" 2 1
+			-attachPosition $button_cache        "left"  2 1
+			-attachPosition $button_cache        "right" 2 2
+			-attachPosition $button_close        "left"  2 2
+			-attachPosition $button_close        "right" 0 3
+			$formLayout_bottomButtons;
+		
+		// Attach the form layout at the given offsets
+		formLayout -e
+			-attachForm $formLayout_bottomButtons "left"   7
+			-attachForm $formLayout_bottomButtons "bottom" 7
+			-attachForm $formLayout_bottomButtons "right"  7
+			$formLayout_outerMain;
+			
+		setParent ..;
+
+		// Trick to get the top border back
+		string $tabLayout_topFix = `tabLayout -borderStyle "top" -tabsVisible false`;
+		formLayout -e
+			-attachForm $tabLayout_topFix "top"    0
+			-attachForm $tabLayout_topFix "left"   7
+			-attachForm $tabLayout_topFix "right"  7
+			$formLayout_outerMain;
+
+	// Edit initial control states
+	if ($currentBakingModeIndex == 0)
+		radioCollection -e -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_Duplicates $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_BakingMode;
+	else if ($currentBakingModeIndex == 1)
+		radioCollection -e -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_Instances $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_BakingMode;
+
+	if ($currentGroupModeIndex == 0)
+		radioCollection -e -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupParent $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_GroupMode;
+	else if ($currentGroupModeIndex == 1)
+		radioCollection -e -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupWorld $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_GroupMode;
+	else if ($currentGroupModeIndex == 2)
+		radioCollection -e -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupNew $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_GroupMode;
+
+	if ($currentInputSpaceIndex == 0)
+		radioCollection -e -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceObject $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_InputSpace;
+	else if ($currentInputSpaceIndex == 1)
+		radioCollection -e -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceLocal $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_InputSpace;
+	else if ($currentInputSpaceIndex == 2)
+		radioCollection -e -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceWorld $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_InputSpace;
+
+	if ($currentTimeRangeIndex == 0)
+	{
+		radioCollection -e -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_TimeSlider $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_TimeRange;
+		disable -value true $rowLayout_startTime;
+		disable -value true $rowLayout_endTime;
+	}
+	else if ($currentTimeRangeIndex == 1)
+	{
+		radioCollection -e -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_StartEnd $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_TimeRange;
+		disable -value false $rowLayout_startTime;
+		disable -value false $rowLayout_endTime;
+	}
+
+	setFocus $MRS_FlexiInstancer_InstanceBakingUI;
+	showWindow;
+}
+
+
+// ------ Instance Baking Window - Commands --------------------------------------------------------------------------------------------------------------------------------------
+
+//	Description
+//	-----------
+//	Resets values on UI controls to the current values stored with the global optionVars
+//	Any other UI values will remain unchanged
+global proc MRS_FlexiInstancer_refreshInstanceBakingUI()
+{
+	// Global optionVar names
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_BakingMode;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_GroupMode;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_InputSpace;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteInstancer;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteSourceHierarchies;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeRange;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_StartTime;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_EndTime;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeStep;
+
+	// Global control names
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_BakingMode;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_Duplicates;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_Instances;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_GroupMode;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupParent;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupWorld;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupNew;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_InputSpace;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceObject;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceLocal;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceWorld;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_CheckBox_DeleteInstancer;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_CheckBox_DeleteSourceHierarchies;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_TimeRange;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_TimeSlider;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_StartEnd;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_FloatField_StartTime;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_FloatField_EndTime;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_FloatField_TimeStep;
+
+	// Current values
+	int $currentBakingModeIndex = `optionVar -q $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_BakingMode`;
+	int $currentGroupModeIndex = `optionVar -q $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_GroupMode`;
+	int $currentInputSpaceIndex = `optionVar -q $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_InputSpace`;
+	int $currentDeleteInstancerState = `optionVar -q $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteInstancer`;
+	int $currentDeleteSourceHierarchiesState = `optionVar -q $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteSourceHierarchies`;
+	int $currentTimeRangeIndex = `optionVar -q $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeRange`;
+	float $currentStartTime = `optionVar -q $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_StartTime`;
+	float $currentEndTime = `optionVar -q $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_EndTime`;
+	float $currentTimeStep = `optionVar -q $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeStep`;
+
+	if ($currentBakingModeIndex == 0)
+		radioCollection -e -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_Duplicates $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_BakingMode;
+	else if ($currentBakingModeIndex == 1)
+		radioCollection -e -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_Instances $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_BakingMode;
+
+	if ($currentGroupModeIndex == 0)
+		radioCollection -e -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupParent $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_GroupMode;
+	else if ($currentGroupModeIndex == 1)
+		radioCollection -e -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupWorld $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_GroupMode;
+	else if ($currentGroupModeIndex == 2)
+		radioCollection -e -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupNew $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_GroupMode;
+
+	if ($currentInputSpaceIndex == 0)
+		radioCollection -e -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceObject $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_InputSpace;
+	else if ($currentInputSpaceIndex == 1)
+		radioCollection -e -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceLocal $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_InputSpace;
+	else if ($currentInputSpaceIndex == 2)
+		radioCollection -e -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceWorld $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_InputSpace;
+
+	if ($currentTimeRangeIndex == 0)
+		radioCollection -e -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_TimeSlider $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_TimeRange;
+	else if ($currentTimeRangeIndex == 1)
+		radioCollection -e -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_StartEnd $MRS_FlexiInstancer_InstanceBakingUI_RadioCollection_TimeRange;
+
+	checkBox -e -value $currentDeleteInstancerState $MRS_FlexiInstancer_InstanceBakingUI_CheckBox_DeleteInstancer;
+	checkBox -e -value $currentDeleteSourceHierarchiesState $MRS_FlexiInstancer_InstanceBakingUI_CheckBox_DeleteSourceHierarchies;
+
+	floatField -e -value $currentStartTime $MRS_FlexiInstancer_InstanceBakingUI_FloatField_StartTime;
+	floatField -e -value $currentEndTime $MRS_FlexiInstancer_InstanceBakingUI_FloatField_EndTime;
+	floatField -e -value $currentTimeStep $MRS_FlexiInstancer_InstanceBakingUI_FloatField_TimeStep;
+}
+
+
+//	Description
+//	-----------
+//	Sets up the global optionVar values for the UI
+global proc MRS_FlexiInstancer_createInstanceBakingUIDefaultSettings()
+{
+	// Global optionVar names
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_BakingMode;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_GroupMode;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_InputSpace;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteInstancer;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteSourceHierarchies;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeRange;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_StartTime;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_EndTime;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeStep;
+
+	// Global values
+	global int $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultBakingModeIndex;
+	global int $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultGroupModeIndex;
+	global int $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultInputSpaceIndex;
+	global int $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultDeleteInstancerState;
+	global int $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultDeleteSourceHierarchiesState;
+	global int $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultTimeRangeIndex;
+	global float $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultStartTime;
+	global float $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultEndTime;
+	global float $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultTimeStep;
+
+	// Setup optionVars
+	if (!`optionVar -exists $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_BakingMode`)
+		optionVar -intValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_BakingMode $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultBakingModeIndex;
+
+	if (!`optionVar -exists $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_GroupMode`)
+		optionVar -intValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_GroupMode $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultGroupModeIndex;
+
+	if (!`optionVar -exists $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_InputSpace`)
+		optionVar -intValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_InputSpace $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultInputSpaceIndex;
+
+	if (!`optionVar -exists $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteInstancer`)
+		optionVar -intValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteInstancer $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultDeleteInstancerState;
+
+	if (!`optionVar -exists $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteSourceHierarchies`)
+		optionVar -intValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteSourceHierarchies $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultDeleteSourceHierarchiesState;
+
+	if (!`optionVar -exists $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeRange`)
+		optionVar -intValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeRange $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultTimeRangeIndex;
+
+	if (!`optionVar -exists $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_StartTime`)
+		optionVar -floatValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_StartTime $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultStartTime;
+
+	if (!`optionVar -exists $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_EndTime`)
+		optionVar -floatValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_EndTime $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultEndTime;
+
+	if (!`optionVar -exists $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeStep`)
+		optionVar -floatValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeStep $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultTimeStep;
+}
+
+
+//	Description
+//	-----------
+//	Resets the global optionVar values to their defaults and updates the UI to reflect any changes
+global proc MRS_FlexiInstancer_resetInstanceBakingUIDefaultSettings()
+{
+	// Global optionVar names
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_BakingMode;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_GroupMode;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_InputSpace;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteInstancer;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteSourceHierarchies;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeRange;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_StartTime;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_EndTime;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeStep;
+
+	// Global values
+	global int $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultBakingModeIndex;
+	global int $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultGroupModeIndex;
+	global int $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultInputSpaceIndex;
+	global int $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultDeleteInstancerState;
+	global int $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultDeleteSourceHierarchiesState;
+	global int $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultTimeRangeIndex;
+	global float $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultStartTime;
+	global float $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultEndTime;
+	global float $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultTimeStep;
+
+	// Set optionVars
+	optionVar -intValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_BakingMode $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultBakingModeIndex;
+	optionVar -intValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_GroupMode $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultGroupModeIndex;
+	optionVar -intValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_InputSpace $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultInputSpaceIndex;
+	optionVar -intValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteInstancer $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultDeleteInstancerState;
+	optionVar -intValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteSourceHierarchies $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultDeleteSourceHierarchiesState;
+	optionVar -intValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeRange $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultTimeRangeIndex;
+	optionVar -floatValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_StartTime $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultStartTime;
+	optionVar -floatValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_EndTime $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultEndTime;
+	optionVar -floatValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeStep $MRS_FlexiInstancer_InstanceBakingUI_Value_DefaultTimeStep;
+
+	// Refresh the UI
+	MRS_FlexiInstancer_refreshInstanceBakingUI();
+}
+
+
+global proc MRS_FlexiInstancer_saveInstanceBakingUICustomSettings()
+{
+	// Global optionVar names
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_BakingMode;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_GroupMode;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_InputSpace;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteInstancer;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteSourceHierarchies;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeRange;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_StartTime;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_EndTime;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeStep;
+
+	// Global control names
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_Duplicates;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_Instances;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupParent;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupWorld;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupNew;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceObject;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceLocal;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceWorld;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_CheckBox_DeleteInstancer;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_CheckBox_DeleteSourceHierarchies;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_TimeSlider;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_StartEnd;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_FloatField_StartTime;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_FloatField_EndTime;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_FloatField_TimeStep;
+
+	// Current control values
+	int $currentBakingModeIndex;
+	if (`radioButton -q -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_Duplicates`)
+		$currentBakingModeIndex = 0;
+	else
+		$currentBakingModeIndex = 1;
+
+	int $currentGroupModeIndex;
+	if (`radioButton -q -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupParent`)
+		$currentGroupModeIndex = 0;
+	else if (`radioButton -q -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupWorld`)
+		$currentGroupModeIndex = 1;
+	else
+		$currentGroupModeIndex = 2;
+
+	int $currentInputSpaceIndex;
+	if (`radioButton -q -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceObject`)
+		$currentGroupModeIndex = 0;
+	else if (`radioButton -q -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceLocal`)
+		$currentGroupModeIndex = 1;
+	else
+		$currentGroupModeIndex = 2;
+
+	int $currentDeleteInstancerState = `checkBox -q -value $MRS_FlexiInstancer_InstanceBakingUI_CheckBox_DeleteInstancer`;
+	int $currentDeleteSourceHierarchiesState = `checkBox -q -value $MRS_FlexiInstancer_InstanceBakingUI_CheckBox_DeleteSourceHierarchies`;
+
+	int $currentTimeRangeIndex;
+	if (`radioButton -q -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_TimeSlider`)
+		$currentTimeRangeIndex = 0;
+	else
+		$currentTimeRangeIndex = 1;
+
+	float $currentStartTime = `floatField -q -value $MRS_FlexiInstancer_InstanceBakingUI_FloatField_StartTime`;
+	float $currentEndTime = `floatField -q -value $MRS_FlexiInstancer_InstanceBakingUI_FloatField_EndTime`;
+	float $currentTimeStep = `floatField -q -value $MRS_FlexiInstancer_InstanceBakingUI_FloatField_TimeStep`;
+
+	// Set optionVars
+	optionVar -intValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_BakingMode $currentBakingModeIndex;
+	optionVar -intValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_GroupMode $currentGroupModeIndex;
+	optionVar -intValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_InputSpace $currentInputSpaceIndex;
+	optionVar -intValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteInstancer $currentDeleteInstancerState;
+	optionVar -intValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_DeleteSourceHierarchies $currentDeleteSourceHierarchiesState;
+	optionVar -intValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeRange $currentTimeRangeIndex;
+	optionVar -floatValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_StartTime $currentStartTime;
+	optionVar -floatValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_EndTime $currentEndTime;
+	optionVar -floatValue $MRS_FlexiInstancer_InstanceBakingUI_OptionVar_TimeStep $currentTimeStep;
+}
+
+
+global proc MRS_FlexiInstancer_bakeInstances(string $shapeNodeName)
+{
+	// Global control names
+	global string $MRS_FlexiInstancer_InstanceBakingUI_OptionMenu_SelectInstancer;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_Instances;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupWorld;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupNew;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceLocal;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceWorld;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_CheckBox_DeleteInstancer;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_CheckBox_DeleteSourceHierarchies;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_TimeSlider;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_FloatField_StartTime;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_FloatField_EndTime;
+	global string $MRS_FlexiInstancer_InstanceBakingUI_FloatField_TimeStep;
+
+	string $parents[] = `listRelatives -p $shapeNodeName`;
+	string $parentNodeName = $parents[0];
+	// Retrieve values from window
+	string $instancerNodeName = `optionMenu -q -value $MRS_FlexiInstancer_InstanceBakingUI_OptionMenu_SelectInstancer`;
+
+	int $bakingModeIndex = 0;
+	if (`radioButton -q -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_Instances`)
+		$bakingModeIndex = 1;
+	
+	int $groupModeIndex = 0;
+	if (`radioButton -q -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupWorld`)
+		$groupModeIndex = 1;
+	else if (`radioButton -q -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_GroupNew`)
+		$groupModeIndex = 2;
+
+	int $inputSpaceIndex = 0;
+	if (`radioButton -q -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceLocal`)
+		$inputSpaceIndex = 1;
+	else if (`radioButton -q -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_InputSpaceWorld`)
+		$inputSpaceIndex = 2;
+
+	int $deleteInstancerState = `checkBox -q -value $MRS_FlexiInstancer_InstanceBakingUI_CheckBox_DeleteInstancer`;
+	int $deleteSourceHierarchiesState = `checkBox -q -value $MRS_FlexiInstancer_InstanceBakingUI_CheckBox_DeleteSourceHierarchies`;
+
+	float $startTime;
+	float $endTime;
+	float $timeStep = `floatField -q -value $MRS_FlexiInstancer_InstanceBakingUI_FloatField_TimeStep`;
+
+	if (`radioButton -q -select $MRS_FlexiInstancer_InstanceBakingUI_RadioButton_TimeSlider`)
+	{
+		$startTime = `playbackOptions -q -minTime`;
+		$endTime = `playbackOptions -q -maxTime`;
+	}
+	else
+	{
+		$startTime = `floatField -q -value $MRS_FlexiInstancer_InstanceBakingUI_FloatField_StartTime`;
+		$endTime = `floatField -q -value $MRS_FlexiInstancer_InstanceBakingUI_FloatField_EndTime`;
+	}
+
+	// Ensure shape node is still connected to instancer
+	string $instancerNodeNames[] = stringArrayCatenate(
+		`listConnections -type instancer ($shapeNodeName + ".outputWorldParticleArray")`,
+		`listConnections -type instancer ($shapeNodeName + ".outputLocalParticleArray")`);
+
+	int $isInstancerConnected = 0;
+	for ($i = 0; $i < size($instancerNodeNames); ++$i)
+	{
+		if ($instancerNodeNames[$i] == $instancerNodeName)
+			$isInstancerConnected = 1;
+	}
+
+	if ($isInstancerConnected == 0)
+		error -showLineNumber true ("\"" + $shapeNodeName + "\"" + " has been disconnected from " + "\"" + $instancerNodeName + "\". Aborting instance bake.");
+	
+	// Bake Particle Instances to Geometry
+	if ($groupModeIndex == 0)
+		instancerBake 
+			-startTime $startTime -endTime $endTime -timeStep $timeStep 
+			-instance $bakingModeIndex -parent $parentNodeName -inputSpace $inputSpaceIndex
+			-deleteInstancer $deleteInstancerState -deleteSourceHierarchies $deleteSourceHierarchiesState
+			$instancerNodeName;
+	else if ($groupModeIndex == 1)
+		instancerBake 
+			-startTime $startTime -endTime $endTime -timeStep $timeStep 
+			-instance $bakingModeIndex -world 1 -inputSpace $inputSpaceIndex
+			-deleteInstancer $deleteInstancerState -deleteSourceHierarchies $deleteSourceHierarchiesState
+			$instancerNodeName;
+	else
+		instancerBake 
+			-startTime $startTime -endTime $endTime -timeStep $timeStep 
+			-instance $bakingModeIndex -inputSpace $inputSpaceIndex
+			-deleteInstancer $deleteInstancerState -deleteSourceHierarchies $deleteSourceHierarchiesState
+			$instancerNodeName;
+}

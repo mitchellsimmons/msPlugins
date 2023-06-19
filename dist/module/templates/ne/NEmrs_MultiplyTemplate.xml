@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+	<using package='maya'/>
+	<template name='NEmrs_Multiply'>
+		<attribute name='message' type='maya.message'>
+			<label>Message</label>
+		</attribute>
+		<attribute name='output' type='maya.double'>
+			<label>Output</label>
+		</attribute>
+		<attribute name='input1' type='maya.double'>
+			<label>Input 1</label>
+		</attribute>
+		<attribute name='input2' type='maya.double'>
+			<label>Input 2</label>
+		</attribute>
+	</template>
+	<view name='NEDefault' template='NEmrs_Multiply'>
+		<property name='message'/>
+		<property name='output'/>
+		<property name='input1'/>
+		<property name='input2'/>
+	</view>
+</templates>

@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+  <using package='maya'/>
+  <using package='std'/>
+  <template name='NE${NODE_NAME_PREFIX}GeometricSequenceIntArray'>
+    <attribute name='message' type='maya.message'>
+      <label>Message</label>
+    </attribute>
+    <attribute name='outputSequence' type='maya.Int32Array'>
+      <label>Output Sequence</label>
+    </attribute>
+    <attribute name='size' type='maya.long'>
+      <label>Size</label>
+    </attribute>
+    <attribute name='firstTerm' type='maya.long'>
+      <label>First Term</label>
+    </attribute>
+    <attribute name='commonRatio' type='maya.long'>
+      <label>Common Ratio</label>
+    </attribute>
+  </template>
+  <view name='NEDefault' template='NE${NODE_NAME_PREFIX}GeometricSequenceIntArray'>
+    <property name='message'/>
+    <property name='outputSequence'/>
+    <property name='size'/>
+    <property name='firstTerm'/>
+    <property name='commonRatio'/>
+  </view>
+</templates>

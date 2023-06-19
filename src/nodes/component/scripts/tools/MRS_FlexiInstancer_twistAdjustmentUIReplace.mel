@@ -1,0 +1,24 @@
+// ------ Twist Adjustment Window - Replace -------------------------------------------------------------------------------------------------------------------------------------------
+
+global string $MRS_FlexiInstancer_TwistAdjustmentUI_WorkspaceControl = "MRS_FlexiInstancer_TwistAdjustmentUI_WorkspaceControl";
+global string $MRS_FlexiInstancer_TwistAjustmentUI = "MRS_FlexiInstancer_TwistAjustmentUI";
+
+global proc MRS_FlexiInstancer_twistAdjustmentUIReplace(string $nodeManipPlugName)
+{
+	// Global values
+	global string $MRS_FlexiInstancer_TwistAdjustmentUI_WorkspaceControl;
+	global string $MRS_FlexiInstancer_TwistAjustmentUI;
+	
+	if (`workspaceControl -q -exists $MRS_FlexiInstancer_TwistAdjustmentUI_WorkspaceControl` && `workspaceControl -q -visible $MRS_FlexiInstancer_TwistAdjustmentUI_WorkspaceControl`)
+	{
+		if (`window -q -exists $MRS_FlexiInstancer_TwistAjustmentUI`)
+		{
+			if (`window -q -title $MRS_FlexiInstancer_TwistAjustmentUI` == ($nodeManipPlugName + ".twistAdjustmentRamp"))
+				return;
+		}
+		
+		int $isCollapsed = `workspaceControl -q -collapse $MRS_FlexiInstancer_TwistAdjustmentUI_WorkspaceControl`;
+		MRS_FlexiInstancer_twistAdjustmentUINew $nodeManipPlugName;
+		workspaceControl -e -collapse $isCollapsed $MRS_FlexiInstancer_TwistAdjustmentUI_WorkspaceControl;
+	}
+}

@@ -1,0 +1,1359 @@
+// Source scripts for access to internal globals
+source "MRS_rampTemplate";
+source "MRS_FlexiChainDouble_contextTools";
+
+
+// ------ AE Customisations ------------------------------------------------------------------------------------------------------------------------------------------
+
+proc customSeparator()
+{
+	editorTemplate -callCustom "MRS_FlexiChainDouble_customSeparator_AEnew" "MRS_FlexiChainDouble_customSeparator_AEreplace";
+}
+
+
+proc customSpacer()
+{
+	editorTemplate -callCustom "MRS_FlexiChainDouble_customSpacer_AEnew" "MRS_FlexiChainDouble_customSpacer_AEreplace";
+}
+
+
+// ------ AE Template ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc AE${NODE_NAME_PREFIX}FlexiChainDoubleShapeTemplate( string $nodeName )
+{
+	string $annotation;
+
+	editorTemplate -beginScrollLayout;
+
+	editorTemplate -beginLayout "General" -collapse 0;
+
+		customSpacer();
+
+		$annotation = "Defines whether orient data is computed for each connected output attribute. This does not affect position only outputs.";
+		editorTemplate -label "Compute Orient" -annotation $annotation -addControl "computeOrientation";
+
+		customSeparator();
+
+		$annotation = "Defines the number of outputs produced by each connected output attribute.";
+		editorTemplate -label "Output Count" -annotation $annotation -addControl "outputCount";
+
+		customSpacer();
+
+		$annotation = "Defines the precision of the curve.";
+		editorTemplate -label "Subdivisions" -annotation $annotation -addControl "subdivisions";
+
+		customSpacer();
+
+		$annotation = "Defines whether sampling occurs in terms of the curves natural parameter, a parameterization of arc-length, or a parameterization of split arc-length.";
+		editorTemplate -label "Parameterization" -annotation $annotation -addControl "parameterization";
+
+		customSeparator();
+		
+		$annotation = "Defines the order in which rotations are composed for output orient attributes.";
+		editorTemplate -label "Rotate Order" -annotation $annotation -addControl "rotateOrder";
+
+		customSpacer();
+
+		$annotation = "Defines the up-vector used to calculate the principal normal of the curve.";
+		editorTemplate -label "Up Vector" -annotation $annotation -addControl "upVector";
+
+		customSpacer();
+
+	editorTemplate -endLayout;
+
+	editorTemplate -beginLayout "Shape" -collapse 1;
+
+		customSpacer();
+
+		$annotation = "Defines the position of the control point at index 0.";
+		editorTemplate -label "Control Point 0" -annotation $annotation -addControl "controlPoint0";
+
+		customSpacer();
+
+		$annotation = "Defines the position of the control point at index 1.";
+		editorTemplate -label "Control Point 1" -annotation $annotation -addControl "controlPoint1";
+
+		customSpacer();
+
+		$annotation = "Defines the position of the control point at index 2.";
+		editorTemplate -label "Control Point 2" -annotation $annotation -addControl "controlPoint2";
+
+		customSpacer();
+
+		$annotation = "Defines the position of the control point at index 3.";
+		editorTemplate -label "Control Point 3" -annotation $annotation -addControl "controlPoint3";
+
+		customSeparator();
+
+		$annotation = "Defines an offset multiplier for the two virtual control points associated with the second physical control point. Translates them in a direction approximately perpendicular to the curve.";
+		editorTemplate -label "Joint Offset 0" -annotation $annotation -addControl "jointOffset0";
+
+		customSpacer();
+
+		$annotation = "Defines an offset for the two virtual control points associated with the second physical control point. Translates them in a direction approximately tangent to the curve.";
+		editorTemplate -label "Joint Radius 0" -annotation $annotation -addControl "jointRadius0";
+
+		customSpacer();
+
+		editorTemplate -callCustom "MRS_FlexiChainDouble_jointVolume0_AEnew" "MRS_FlexiChainDouble_jointVolume0_AEreplace" "jointVolume0";
+
+		customSeparator();
+
+		$annotation = "Defines an offset multiplier for the two virtual control points associated with the third physical control point. Translates them in a direction approximately perpendicular to the curve.";
+		editorTemplate -label "Joint Offset 1" -annotation $annotation -addControl "jointOffset1";
+
+		customSpacer();
+
+		$annotation = "Defines an offset for the two virtual control points associated with the third physical control point. Translates them in a direction approximately tangent to the curve.";
+		editorTemplate -label "Joint Radius 1" -annotation $annotation -addControl "jointRadius1";
+
+		customSpacer();
+
+		editorTemplate -callCustom "MRS_FlexiChainDouble_jointVolume1_AEnew" "MRS_FlexiChainDouble_jointVolume1_AEreplace" "jointVolume1";
+
+		customSpacer();
+
+	editorTemplate -endLayout;
+
+	editorTemplate -beginLayout "Draw" -collapse 1;
+
+		customSpacer();
+
+		editorTemplate -beginNoOptimize;
+
+		$annotation = "Defines whether to draw a ribbon, used to provide a visual depiction of output transform data.";
+		editorTemplate -label "Draw Ribbon" -annotation $annotation -addControl "drawRibbon";
+
+		customSpacer();
+
+		$annotation = "Defines whether to draw a curve, used to provide a visual depiction of output positional data.";
+		editorTemplate -label "Draw Curve" -annotation $annotation -addControl "drawCurve";
+
+		customSpacer();
+
+		$annotation = "Defines whether to draw the curve's normals, used to provide a visual depiction of output orient data.";
+		editorTemplate -label "Draw Normals" -annotation $annotation -addControl "drawNormals";
+
+		customSpacer();
+
+		$annotation = "Defines whether to draw the curve's hull, helps to maintain a visual hierarchy of control points.";
+		editorTemplate -label "Draw Hull" -annotation $annotation -addControl "drawHull";
+
+		editorTemplate -endNoOptimize;
+
+		customSeparator();
+
+		$annotation = "Defines the transformation applied to local space draw data.";
+		editorTemplate -label "Draw Space Transform" -annotation $annotation -addControl "drawSpaceTransformation";
+
+		customSpacer();
+
+	editorTemplate -endLayout;
+
+	editorTemplate -beginLayout "Twist" -collapse 1;
+
+		customSpacer();
+
+		editorTemplate -callCustom "MRS_FlexiChainDouble_roll_AEnew" "MRS_FlexiChainDouble_roll_AEreplace" "roll";
+
+		customSeparator();
+
+		editorTemplate -callCustom "MRS_FlexiChainDouble_startTwist_AEnew" "MRS_FlexiChainDouble_startTwist_AEreplace" "startTwist";
+
+		customSpacer();
+
+		editorTemplate -callCustom "MRS_FlexiChainDouble_endTwist_AEnew" "MRS_FlexiChainDouble_endTwist_AEreplace" "endTwist";
+
+		customSeparator();
+
+		$annotation = "Defines the influence that existing counter-twist cache data has on the moving frame of the curve.";
+		editorTemplate -label "Counter Twist Blend" -annotation $annotation -addControl "counterTwistBlend";
+
+		customSpacer();
+
+		$annotation = "This attribute is used to cache counter-twist data. It should not be set manually, instead the custom counter-twist UI is used to calculate and set the cache.";
+		editorTemplate -label "Counter Twist Cache" -annotation $annotation -addControl "counterTwist";
+
+		customSpacer();
+
+		// An empty string is given as the attribute, the function will recieve "node."
+		editorTemplate -callCustom "MRS_FlexiChainDouble_showCounterTwistUI_AEnew" "MRS_FlexiChainDouble_showCounterTwistUI_AEreplace" "";
+
+		customSpacer();
+
+	editorTemplate -endLayout;
+
+	editorTemplate -beginLayout "Up Vector Overrides" -collapse 1;
+
+		customSpacer();
+
+		$annotation = "Defines whether the default normal up-vector should be overridden. The override is designed to be manually driven.";
+		editorTemplate -label "Normal Up State" -annotation $annotation -addControl "normalUpVectorOverrideState";
+
+		customSpacer();
+
+		editorTemplate -callCustom "MRS_FlexiChainDouble_normalUpOverride_AEnew" "MRS_FlexiChainDouble_normalUpOverride_AEreplace" "normalUpVectorOverrideDirection";
+
+		customSeparator();
+
+		$annotation = "Defines whether the default counter-twist up-vector should be overridden. The override is designed to be manually driven.";
+		editorTemplate -label "Counter Twist Up State" -annotation $annotation -addControl "counterTwistUpVectorOverrideState";
+
+		customSpacer();
+
+		editorTemplate -callCustom "MRS_FlexiChainDouble_counterTwistUpOverride_AEnew" "MRS_FlexiChainDouble_counterTwistUpOverride_AEreplace" "counterTwistUpVectorOverrideDirection";
+
+		customSeparator();
+
+		editorTemplate -callCustom "MRS_FlexiChainDouble_upOverrideInteractiveMode_AEnew" "MRS_FlexiChainDouble_upOverrideInteractiveMode_AEreplace" "";
+
+		customSpacer();
+
+	editorTemplate -endLayout;
+
+	editorTemplate -beginLayout "Twist Adjustments" -collapse 1;
+
+		customSpacer();
+
+		$annotation = "Defines whether twist adjustments should be computed. This is an optimisation state to avoid unnecessary attribute lookups.";
+		editorTemplate -label "Compute Twist Adjustments" -annotation $annotation -addControl "computeTwistAdjustments";
+
+		customSeparator();
+
+		// There is no easy way to edit array attributes
+		// This makes it very difficult to have certain array attributes (eg. ramps) display in the attribute editor
+		// We will attempt to mimic how Maya deals with array attributes
+		// There are a few files which provide decent context for our setup ("AEnewNonNumericMulti", "AEreplaceNonNumericMulti", "AEnewCompound", "AEreplaceCompound")
+		editorTemplate -callCustom "MRS_FlexiChainDouble_twistAdjustment_AEnew" "MRS_FlexiChainDouble_twistAdjustment_AEreplace" "twistAdjustment";
+
+		customSeparator();
+
+		editorTemplate -callCustom "MRS_FlexiChainDouble_twistAdjustmentInteractiveMode_AEnew" "MRS_FlexiChainDouble_twistAdjustmentInteractiveMode_AEreplace" "";
+
+		customSpacer();
+
+	editorTemplate -endLayout;
+
+	editorTemplate -beginLayout "Scale Adjustments" -collapse 1;
+
+		customSpacer();
+
+		$annotation = "Defines whether scale adjustments should be computed. This is an optimisation state to avoid unnecessary attribute lookups.";
+		editorTemplate -label "Compute Scale Adjustments" -annotation $annotation -addControl "computeScaleAdjustments";
+
+		customSeparator();
+
+		editorTemplate -callCustom "MRS_FlexiChainDouble_scaleAdjustment_AEnew" "MRS_FlexiChainDouble_scaleAdjustment_AEreplace" "scaleAdjustment";
+
+		customSeparator();
+
+		editorTemplate -callCustom "MRS_FlexiChainDouble_scaleAdjustmentInteractiveMode_AEnew" "MRS_FlexiChainDouble_scaleAdjustmentInteractiveMode_AEreplace" "";
+
+		customSpacer();
+
+	editorTemplate -endLayout;
+
+	// This node is derived from a locator, therefore we add its template logic after ours
+	// This is copied from AElocatorTemplate.mel
+	editorTemplate -beginLayout (uiRes("m_AElocatorTemplate.kLocatorAttributes")) -collapse 1;
+		AElocatorCommon $nodeName;
+	editorTemplate -endLayout;
+	AElocatorInclude $nodeName;
+
+	// Add extra controls last
+	editorTemplate -addExtraControls;
+
+	// Suppress controls
+	editorTemplate -suppress "normalUpVectorOverride";
+	editorTemplate -suppress "counterTwistUpVectorOverride";
+	// editorTemplate -suppress "controlPoint0";
+	// editorTemplate -suppress "controlPoint1";
+	// editorTemplate -suppress "controlPoint2";
+	// editorTemplate -suppress "controlPoint3";
+
+	editorTemplate -endScrollLayout;
+}
+
+
+// ------ Layout Customisations ------------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc MRS_FlexiChainDouble_customSeparator_AEnew()
+{
+	if (`uiTemplate -exists customSeparator`)
+	{
+		deleteUI -uiTemplate customSeparator;
+	}
+
+	uiTemplate customSeparator;
+
+	// Prevents Maya from formatting the rowLayout using AE settings
+	setUITemplate -pushTemplate customSeparator;
+
+		rowLayout -adj 1 -rowAttach 1 "both" 2;
+
+			// Ensure the separator uses the default AE style
+			setUITemplate -pushTemplate attributeEditorTemplate;
+
+				separator;
+
+			setUITemplate -popTemplate;
+
+		setParent ..;
+
+	setUITemplate -popTemplate;
+}
+
+
+global proc MRS_FlexiChainDouble_customSeparator_AEreplace()
+{
+	// No-op
+}
+
+
+global proc MRS_FlexiChainDouble_customSpacer_AEnew()
+{
+	rowLayout -height 2;
+	setParent ..;
+}
+
+
+global proc MRS_FlexiChainDouble_customSpacer_AEreplace()
+{
+	// No-op
+}
+
+
+// ------ General ------------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc MRS_FlexiChainDouble_jointVolume0_AEnew(string $nodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_AttrFieldSliderGrp_JointVolume0;
+
+	// Must use the fieldStep flag instead of the more general step flag, otherwise the precision flag has no effect
+	$annotation = "Defines a shaping parameter used to specify the effect that the control polygon has on the shape of the curve in proximity to the second physical control point. Higher values produce a greater effect.";
+	$MRS_FLexiChainDouble_AE_AttrFieldSliderGrp_JointVolume0 = `attrFieldSliderGrp -label "Joint Volume 0" -fieldStep 0.01 -precision 3 -annotation $annotation -attribute $nodeAttrName`;
+}
+
+
+global proc MRS_FlexiChainDouble_jointVolume0_AEreplace(string $nodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_AttrFieldSliderGrp_JointVolume0;
+
+	attrFieldSliderGrp -e -attribute $nodeAttrName $MRS_FLexiChainDouble_AE_AttrFieldSliderGrp_JointVolume0;
+}
+
+
+global proc MRS_FlexiChainDouble_jointVolume1_AEnew(string $nodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_AttrFieldSliderGrp_JointVolume1;
+
+	// Must use the fieldStep flag instead of the more general step flag, otherwise the precision flag has no effect
+	$annotation = "Defines a shaping parameter used to specify the effect that the control polygon has on the shape of the curve in proximity to the third physical control point. Higher values produce a greater effect.";
+	$MRS_FLexiChainDouble_AE_AttrFieldSliderGrp_JointVolume1 = `attrFieldSliderGrp -label "Joint Volume 1" -fieldStep 0.01 -precision 3 -annotation $annotation -attribute $nodeAttrName`;
+}
+
+
+global proc MRS_FlexiChainDouble_jointVolume1_AEreplace(string $nodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_AttrFieldSliderGrp_JointVolume1;
+
+	attrFieldSliderGrp -e -attribute $nodeAttrName $MRS_FLexiChainDouble_AE_AttrFieldSliderGrp_JointVolume1;
+}
+
+
+// ------ Twist ------------------------------------------------------------------------------------------------------------------------------------------------
+
+// global proc MRS_FlexiChainDouble_roll_AEnew(string $nodeAttrName)
+// {
+// 	global string $MRS_FLexiChainDouble_AE_FloatField_Roll;
+
+// 	string $annotation = "Defines a constant amount of twist which is applied to the moving frame of the curve.";
+// 	rowLayout -nc 2 -columnWidth 2 70 -annotation $annotation;
+// 		text -label "Roll";
+// 		$MRS_FLexiChainDouble_AE_FloatField_Roll = `floatField -step 1.0 -precision 3 -width 70`;
+// 		connectControl $MRS_FLexiChainDouble_AE_FloatField_Roll $nodeAttrName;
+// 	setParent ..;
+// }
+
+
+// global proc MRS_FlexiChainDouble_roll_AEreplace(string $nodeAttrName)
+// {
+// 	global string $MRS_FLexiChainDouble_AE_FloatField_Roll;
+
+// 	connectControl $MRS_FLexiChainDouble_AE_FloatField_Roll $nodeAttrName;
+// }
+
+
+global proc MRS_FlexiChainDouble_roll_AEnew(string $nodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_AttrFieldSliderGrp_Roll;
+
+	// Must use the fieldStep flag instead of the more general step flag, otherwise the precision flag has no effect
+	string $annotation = "Defines a constant amount of twist which is applied to the moving frame of the curve.";
+	$MRS_FLexiChainDouble_AE_AttrFieldSliderGrp_Roll = `attrFieldSliderGrp -label "Roll" -fieldStep 1.0 -precision 3 -annotation $annotation -attribute $nodeAttrName`;
+}
+
+
+global proc MRS_FlexiChainDouble_roll_AEreplace(string $nodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_AttrFieldSliderGrp_Roll;
+
+	attrFieldSliderGrp -e -attribute $nodeAttrName $MRS_FLexiChainDouble_AE_AttrFieldSliderGrp_Roll;
+}
+
+
+global proc MRS_FlexiChainDouble_startTwist_AEnew(string $nodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_AttrFieldSliderGrp_StartTwist;
+
+	// Must use the fieldStep flag instead of the more general step flag, otherwise the precision flag has no effect
+	$annotation = "Defines the amount of twist which is applied to the start of the curve. This value has a linear falloff, proportional to the arc-length of the curve.";
+	$MRS_FLexiChainDouble_AE_AttrFieldSliderGrp_StartTwist = `attrFieldSliderGrp -label "Start Twist" -fieldStep 1.0 -precision 3 -annotation $annotation -attribute $nodeAttrName`;
+}
+
+
+global proc MRS_FlexiChainDouble_startTwist_AEreplace(string $nodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_AttrFieldSliderGrp_StartTwist;
+
+	attrFieldSliderGrp -e -attribute $nodeAttrName $MRS_FLexiChainDouble_AE_AttrFieldSliderGrp_StartTwist;
+}
+
+
+global proc MRS_FlexiChainDouble_endTwist_AEnew(string $nodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_AttrFieldSliderGrp_EndTwist;
+
+	// Must use the fieldStep flag instead of the more general step flag, otherwise the precision flag has no effect
+	$annotation = "Defines the amount of twist which is applied to the end of the curve. This value has a linear falloff, proportional to the arc-length of the curve.";
+	$MRS_FLexiChainDouble_AE_AttrFieldSliderGrp_EndTwist = `attrFieldSliderGrp -label "End Twist" -fieldStep 1.0 -precision 3 -annotation $annotation -attribute $nodeAttrName`;
+}
+
+
+global proc MRS_FlexiChainDouble_endTwist_AEreplace(string $nodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_AttrFieldSliderGrp_EndTwist;
+
+	attrFieldSliderGrp -e -attribute $nodeAttrName $MRS_FLexiChainDouble_AE_AttrFieldSliderGrp_EndTwist;
+}
+
+
+// ------ Up-Vector Overrides ------------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc MRS_FlexiChainDouble_normalUpOverride_AEnew(string $normalUpOverrideNodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_AttrField_NormalUpOverride;
+
+	string $annotation = "Defines a vector which can override the default up-vector used in calculating the curve's normal. The override is designed to be manually driven.";
+	$MRS_FLexiChainDouble_AE_AttrField_NormalUpOverride = `attrFieldGrp -label "Normal Up" -annotation $annotation -attribute $normalUpOverrideNodeAttrName`;
+}
+
+
+global proc MRS_FlexiChainDouble_normalUpOverride_AEreplace(string $normalUpOverrideNodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_AttrField_NormalUpOverride;
+
+	attrFieldGrp -e -attribute $normalUpOverrideNodeAttrName $MRS_FLexiChainDouble_AE_AttrField_NormalUpOverride;
+}
+
+
+global proc MRS_FlexiChainDouble_counterTwistUpOverride_AEnew(string $counterTwistUpOverrideNodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_AttrField_CounterTwistUpOverride;
+
+	string $annotation = "Defines a vector which can override the default up-vector used in calculating the counter-twist cache. The override is designed to be manually driven.";
+	$MRS_FLexiChainDouble_AE_AttrField_CounterTwistUpOverride = `attrFieldGrp -label "Counter Twist Up" -annotation $annotation -attribute $counterTwistUpOverrideNodeAttrName`;
+}
+
+
+global proc MRS_FlexiChainDouble_counterTwistUpOverride_AEreplace(string $counterTwistUpOverrideNodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_AttrField_CounterTwistUpOverride;
+
+	attrFieldGrp -e -attribute $counterTwistUpOverrideNodeAttrName $MRS_FLexiChainDouble_AE_AttrField_CounterTwistUpOverride;
+}
+
+
+global proc MRS_FlexiChainDouble_upOverrideInteractiveMode_AEnew(string $nodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_Button_UpVectorOverrideContext;
+
+	string $buffer[];
+	tokenize($nodeAttrName, ".", $buffer);
+	string $nodeName = $buffer[0];
+	// Get the parent transform
+	string $parents[] = `listRelatives -parent $nodeName`;
+	string $parentNodeName = $parents[0];
+
+	setUITemplate -pushTemplate attributeEditorTemplate;
+
+		columnLayout -adj true;
+
+			rowLayout -nc 2;
+
+				text -label "";
+				string $annotation = "Toggles on/off a custom context which is designed to provide a way to interactively update the up-vector overrides.";
+				$MRS_FLexiChainDouble_AE_Button_UpVectorOverrideContext = `button -label "Toggle Interactive Mode" -annotation $annotation
+					-c ("MRS_FlexiChainDouble_toggleUpVectorTool " + $parentNodeName)`;
+
+			setParent ..;
+
+		setParent ..;
+
+	setUITemplate -popTemplate;
+}
+
+
+global proc MRS_FlexiChainDouble_upOverrideInteractiveMode_AEreplace(string $nodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_Button_UpVectorOverrideContext;
+
+	string $buffer[];
+	tokenize($nodeAttrName, ".", $buffer);
+	string $nodeName = $buffer[0];
+	// Get the parent transform
+	string $parents[] = `listRelatives -parent $nodeName`;
+	string $parentNodeName = $parents[0];
+
+	button -e -c ("MRS_FlexiChainDouble_toggleUpVectorTool " + $parentNodeName) $MRS_FLexiChainDouble_AE_Button_UpVectorOverrideContext;
+}
+
+
+// ------ Counter Twist UI ------------------------------------------------------------------------------------------------------------------------------------------------
+
+global proc MRS_FlexiChainDouble_showCounterTwistUI_AEnew(string $nodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_Button_BuildCounterTwistUI;
+
+	string $buffer[];
+	tokenize($nodeAttrName, ".", $buffer);
+	string $nodeName = $buffer[0];
+
+	setUITemplate -pushTemplate attributeEditorTemplate;
+
+		columnLayout -adj true;
+
+			rowLayout -nc 2;
+
+				text -label "";
+				string $annotation = "Builds a custom UI which can be used to generate the counter-twist cache for this node.";
+				// Command calls proc from MRS_FlexiChainDouble_counterTwistUI.mel
+				$MRS_FLexiChainDouble_AE_Button_BuildCounterTwistUI = `button -label "Counter Twist Tool" -annotation $annotation
+					-c ("MRS_FlexiChainDouble_counterTwistUI " + $nodeName)`;
+
+			setParent ..;
+
+		setParent ..;
+
+	setUITemplate -popTemplate;
+}
+
+
+global proc MRS_FlexiChainDouble_showCounterTwistUI_AEreplace(string $nodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_Button_BuildCounterTwistUI;
+
+	string $buffer[];
+	tokenize($nodeAttrName, ".", $buffer);
+	string $nodeName = $buffer[0];
+
+	button -e -c ("MRS_FlexiChainDouble_counterTwistUI " + $nodeName) $MRS_FLexiChainDouble_AE_Button_BuildCounterTwistUI;
+}
+
+
+// ------ Twist Adjustment ------------------------------------------------------------------------------------------------------------------------------------------------
+
+//	Description
+//	-----------
+//	This procedure creates a new layout for our compound array attribute and adds controls for any existing elements
+//	It attempts to follow Maya's default logic which can be found in the file "AEnewNonNumericMulti"
+//	It will produce a single global variable which holds the name of the outermost layout which can be used to retrieve child controls
+global proc MRS_FlexiChainDouble_twistAdjustment_AEnew(string $twistAdjustmentNodeAttrName)
+{
+	source "AEnewNonNumericMulti.mel";
+
+	// Global names
+	global string $MRS_FlexiChainDouble_AE_frameLayout_twistAdjustment;
+
+	// Global values
+	global int $gMaxNonNumericMultis;
+
+	// Data
+	string $buffer[];
+	tokenize($twistAdjustmentNodeAttrName, ".", $buffer);
+	string $nodeName = $buffer[0];
+
+	int $elementIndices[] = `getAttr -multiIndices $twistAdjustmentNodeAttrName`;
+	int $numElements = size($elementIndices);
+
+	// UI
+	// By default, Maya adds a frameLayout to encapsulate all element controls, however we are already inside a frameLayout so it is not really necessary
+	// We will add one just for formatting of children, label will not be visible
+	$MRS_FlexiChainDouble_AE_frameLayout_twistAdjustment = `frameLayout -labelVisible false -collapsable false`;
+
+		// Hide the columnLayout while we're creating controls
+		string $columnLayout_main = `columnLayout -adj true -rowSpacing 6 -vis false`;
+
+			// "Add New Item" button
+			rowLayout -numberOfColumns 2;
+
+				text -label "";
+				// This proc adds a new element plug to the array (it exists in the "AEnewNonNumericMulti" file)
+				// We then rely on the attribute editor refreshing and calling the replace proc which will result in the UI controls being added
+				button -label (uiRes("m_AEnewNonNumericMulti.kAddNewItem")) -command ("AEnewNonNumericMultiAddNewItem " + $nodeName + " twistAdjustment");
+
+			setParent ..;
+
+			// If there are more than $gMaxNonNumericMultis elements, clip them
+			int $tooBig = 0;
+			if ( $numElements > $gMaxNonNumericMultis )
+			{
+				$tooBig = $numElements - $gMaxNonNumericMultis;
+				$numElements = $gMaxNonNumericMultis;
+			}
+
+			// Build controls for existing element plugs
+			for ( $i = 0; $i < $numElements; $i++ )
+				MRS_FlexiChainDouble_twistAdjustment_AEnewControl( $nodeName, $elementIndices[$i]);
+			
+			// Tell the user if there are elements that we cannot display
+			if ( $tooBig > 0 )
+				text -l `format -s $tooBig (uiRes("m_AEnewNonNumericMulti.kInsufficientRoom"))`;
+
+		setParent ..;
+
+		// Make the columnLayout visible
+		columnLayout -e -vis true $columnLayout_main;
+
+	setParent ..;
+}
+
+
+//	Description
+//	-----------
+//	This procedure creates a new control for the array element plug given by the $elementIndex value
+//	Maya's default proc "AEnewNonNumericMultiCreateNewControl" can be used to do this automatically by passing "AEnewCompound" as the value for $attributeTypeProc
+//	However we want to manually define how child attribute controls are added, thus we are using a non-default implementation
+global proc MRS_FlexiChainDouble_twistAdjustment_AEnewControl(string $nodeName, int $elementIndex)
+{
+	if ($elementIndex == -1) return;
+
+	// Data
+	string $plugLabel = "Twist Adjustment[" + (string)$elementIndex + "]";
+	string $nodePlugName = $nodeName + ".twistAdjustment[" + (string)$elementIndex + "]";
+	string $nodeChildRampPlugName = $nodePlugName + ".twistAdjustmentRamp";
+	string $nodeChildValuePlugName = $nodePlugName + ".twistAdjustmentValue";
+	string $nodeChildOffsetPlugName = $nodePlugName + ".twistAdjustmentOffset";
+	string $nodeChildFallofModePlugName = $nodePlugName + ".twistAdjustmentFalloffMode";
+	string $nodeChildFallofDistancePlugName = $nodePlugName + ".twistAdjustmentFalloffDistance";
+	string $nodeChildRepeatPlugName = $nodePlugName + ".twistAdjustmentRepeat";
+
+	// UI
+	setUITemplate -pushTemplate attributeEditorTemplate;
+
+		frameLayout -collapsable true -label $plugLabel -collapse false;
+
+			// The default border for frameLayouts does not look great, we can use a tabLayout instead
+			string $formLayout_main = `formLayout`;
+
+				// The top border gets cutoff (fix applied later)
+				string $tabLayout_main = `tabLayout -tabsVisible false`;
+				
+				// Attach the tabLayout at the given offsets
+				formLayout -e
+					-attachForm $tabLayout_main "top"    0
+					-attachForm $tabLayout_main "left"   0
+					-attachForm $tabLayout_main "bottom" 0
+					-attachForm $tabLayout_main "right"  0
+					$formLayout_main;
+
+					columnLayout -adjustableColumn true;
+
+						MRS_FlexiChainDouble_customSpacer_AEnew();
+						// Maya does not allow a gradientControl to be created with a child ramp attribute
+						// The below proc will create a gradientControlNoAttr inside a formLayout (see MRS_rampTemplate.mel for details)
+						string $formLayout_ramp = MRS_ramp_AEnew($nodeChildRampPlugName);
+						string $attrFieldSliderGrp_twist = AEnewFloat($nodeChildValuePlugName, "Twist", "");
+						attrFieldSliderGrp -e -fieldStep 1.0 -precision 3 $attrFieldSliderGrp_twist;
+						MRS_FlexiChainDouble_customSpacer_AEnew();
+						string $attrFieldSliderGrp_offset = AEnewFloat($nodeChildOffsetPlugName, "Offset", "");
+						attrFieldSliderGrp -e -fieldStep 0.001 $attrFieldSliderGrp_offset;
+						MRS_FlexiChainDouble_customSpacer_AEnew();
+						string $attrFieldSliderGrp_falloffDistance = AEnewFloat($nodeChildFallofDistancePlugName, "Falloff Distance", "");
+						attrFieldSliderGrp -e -fieldStep 0.001 $attrFieldSliderGrp_falloffDistance;
+						MRS_FlexiChainDouble_customSpacer_AEnew();
+						AEnewEnum($nodeChildFallofModePlugName, "Falloff Mode", "", {});
+						MRS_FlexiChainDouble_customSpacer_AEnew();
+						AEnewBool($nodeChildRepeatPlugName, "Repeat", "");
+						MRS_FlexiChainDouble_customSpacer_AEnew();
+
+						//	Delete button
+						setUITemplate -pushTemplate attributeEditorMultiTemplate;
+
+							rowLayout -nc 3;
+
+								text -label "";
+								// There appears to be a strange bug which forces the element plug at index 0 to always exist when the node is expanded in the Node Editor
+								// If we try to delete it from the AE, the UI controls for this initial element are dimmed but not removed
+								// The best we can do is ensure the controls are reset so that they are undimmed (ie. attempting to delete this initial element will have no effect)
+								string $cmd = "removeMultiInstance -break true " + $nodePlugName + "; MRS_FlexiChainDouble_twistAdjustment_AEreplace " + $nodeName + ".twistAdjustment";
+								symbolButton -image "smallTrash.png" -command $cmd;
+								text -label "";
+
+							setParent ..;
+
+						setUITemplate -popTemplate;
+
+					setParent ..;
+
+				setParent ..;
+
+				// Trick to get the top border back
+				string $tabLayout_topFix = `tabLayout -borderStyle "top" -tabsVisible false`;
+				formLayout -e
+					-attachForm $tabLayout_topFix "top"    0
+					-attachForm $tabLayout_topFix "left"   0
+					-attachForm $tabLayout_topFix "right"  0
+					$formLayout_main;
+
+				setParent ..;
+
+			setParent ..;
+
+		setParent ..;
+
+	setUITemplate -popTemplate;
+
+	// Edit the command used by the button in our custom ramp layout which expands the ramp view (see MRS_FlexiChainDouble_twistAdjustmentUI.mel for implementation)
+	// We want this button to open the same window as the one which is opened by the rmb callback when the user right clicks on a manipulator in the twist adjustment context
+	string $formLayoutRampChildren[] = `formLayout -q -childArray $formLayout_ramp`;
+	string $button_buildRampUI = $formLayoutRampChildren[2];
+	// We are changing the command from the generic MRS_buildRampUI to one which provides extra controls for the twist adjustment
+	button -e -c ("MRS_FlexiChainDouble_twistAdjustmentUI " + $nodePlugName) $button_buildRampUI;
+}
+
+
+//	Description
+//	-----------
+//	This proc retrieves child controls from the main frameLayout, set up in the AENew proc
+//	It determines which child controls, if any, can be reconnected based on the number of element plugs that the old and new node has
+//	If excess controls exist after reconnections have been made, then they will be removed
+//	If the new node has more element plugs than the previous node, additional controls will be added
+global proc MRS_FlexiChainDouble_twistAdjustment_AEreplace(string $twistAdjustmentNodeAttrName)
+{
+	// Global names
+	global string $MRS_FlexiChainDouble_AE_frameLayout_twistAdjustment;
+
+	// Global values
+	global int $gMaxNonNumericMultis;
+
+	// Data
+	string $buffer[];
+	tokenize($twistAdjustmentNodeAttrName, ".", $buffer);
+	string $nodeName = $buffer[0];
+
+	int $elementIndices[] = `getAttr -multiIndices $twistAdjustmentNodeAttrName`;
+	int $numElements = size($elementIndices);
+
+	// UI
+	if (!`frameLayout -exists $MRS_FlexiChainDouble_AE_frameLayout_twistAdjustment`)
+		return;
+
+	// Retrieve the main columnLayout
+	string $frameLayoutChildren[] = `frameLayout -q -childArray $MRS_FlexiChainDouble_AE_frameLayout_twistAdjustment`;
+	string $columnLayout_main = $frameLayoutChildren[0];
+
+	setParent $columnLayout_main;
+
+	// Hide the columnLayout while we're modifying its children
+	columnLayout -e -vis false $columnLayout_main;
+
+	// Get the number of controls currently in the columnLayout
+	string $columnLayoutChildren[] = `columnLayout -q -childArray $columnLayout_main`;
+
+	// The first control is a row layout containing the "Add New Item" button
+	// Change the button command
+	if( size($columnLayoutChildren) > 0 )
+	{
+		setParent $columnLayoutChildren[0];
+			string $firstRowLayoutChildren[] = `rowLayout -query -childArray $columnLayoutChildren[0]`;
+			if( size($firstRowLayoutChildren) > 1 )
+				button -e -command ("AEnewNonNumericMultiAddNewItem " + $nodeName + " twistAdjustment") $firstRowLayoutChildren[1];
+		setParent ..;
+	}
+
+	int $numCurrentControls = size($columnLayoutChildren);
+	int $numElementControls = $numCurrentControls - 1;
+
+	// If there are $gMaxNonNumericMultis + 1 items, we are displaying the max number of elements plus the "Add New Item" button
+	// If there are $gMaxNonNumericMultis + 2 items, we are displaying the max number of elements plus the "Add New Item" button plus the "Insufficient Room" label
+	// - Delete the label
+	if ( $numCurrentControls == $gMaxNonNumericMultis + 2 )
+	{
+		deleteUI $columnLayoutChildren[$gMaxNonNumericMultis + 1];
+		--$numCurrentControls;
+		--$numElementControls;
+	}
+
+	// If there are more than $gMaxNonNumericMultis elements, clip them
+	int $tooBig = 0;
+	if ( $numElements > $gMaxNonNumericMultis )
+	{
+		$tooBig = $numElements - $gMaxNonNumericMultis;
+		$numElements = $gMaxNonNumericMultis;
+	}
+
+	// We now either have to build more controls and reconnect all of them
+	// Or we have to delete excess control and reconnect all of them
+	if ($numElements >= $numElementControls)
+	{
+		// Reconnect the controls that we can
+		for ( $i = 0; $i < $numElementControls; $i++ )
+			MRS_FlexiChainDouble_twistAdjustment_AEreconnectControl($nodeName, $elementIndices[$i], $columnLayoutChildren[$i + 1] );
+
+		for ( $i = $numElementControls; $i < $numElements; $i++ )
+			MRS_FlexiChainDouble_twistAdjustment_AEnewControl($nodeName, $elementIndices[$i]);
+	}
+	else
+	{
+		// Reconnect the controls that we can
+		for ( $i = 0; $i < $numElements; $i++ )
+			MRS_FlexiChainDouble_twistAdjustment_AEreconnectControl($nodeName, $elementIndices[$i], $columnLayoutChildren[$i + 1] );
+
+		// Delete any excess controls
+		for ( $i = $numElements; $i < $numElementControls; $i++ )
+			deleteUI $columnLayoutChildren[$i + 1];
+	}
+
+	// Recreate the label if there are elements that we cannot display
+	if ( $tooBig > 0 )
+		text -l `format -s $tooBig (uiRes("m_AEnewNonNumericMulti.kInsufficientRoom"))`;
+
+	columnLayout -e -vis true $columnLayout_main;
+}
+
+
+global proc MRS_FlexiChainDouble_twistAdjustment_AEreconnectControl(string $nodeName, int $elementIndex, string $frameLayout_element)
+{
+	if ($elementIndex == -1) return;
+
+	// Data
+	string $plugLabel = "Twist Adjustment[" + (string)$elementIndex + "]";
+	string $nodePlugName = $nodeName + ".twistAdjustment[" + (string)$elementIndex + "]";
+	string $rampNodePlugName = $nodePlugName + ".twistAdjustmentRamp";
+	string $valueNodePlugName = $nodePlugName + ".twistAdjustmentValue";
+	string $offsetNodePlugName = $nodePlugName + ".twistAdjustmentOffset";
+	string $falloffDistanceNodePlugName = $nodePlugName + ".twistAdjustmentFalloffDistance";
+	string $falloffModeNodePlugName = $nodePlugName + ".twistAdjustmentFalloffMode";
+	string $repeatNodePlugName = $nodePlugName + ".twistAdjustmentRepeat";
+
+	// UI
+	// Edit the frameLayout label
+	frameLayout -e -label $plugLabel $frameLayout_element;
+
+	// Get the columnLayout
+	string $frameLayoutChildren[] = `frameLayout -q -childArray $frameLayout_element`;
+	string $formLayout_element = $frameLayoutChildren[0];
+	string $formLayoutChildren[] = `formLayout -q -childArray $formLayout_element`;
+	string $tabLayout_element = $formLayoutChildren[0];
+	string $tabLayoutChildren[] = `tabLayout -q -childArray $tabLayout_element`;
+	string $columnLayout_element = $tabLayoutChildren[0];
+
+	setUITemplate -pushTemplate attributeEditorTemplate;
+
+		setParent $columnLayout_element;
+
+			// Get the columnLayout's children
+			string $columnLayoutChildren[] = `columnLayout -q -childArray $columnLayout_element`;
+			// Get the child control names
+			string $formLayout_ramp = `setParent -query` + "|" + $columnLayoutChildren[1];
+			string $attrFieldSliderGrp_twist = `setParent -query` + "|" + $columnLayoutChildren[2];
+			string $attrFieldSliderGrp_offset = `setParent -query` + "|" + $columnLayoutChildren[4];
+			string $attrFieldSliderGrp_falloffDistance = `setParent -query` + "|" + $columnLayoutChildren[6];
+			string $attrEnumOptionMenuGrp_falloffMode = `setParent -query` + "|" + $columnLayoutChildren[8];
+			string $checkBoxGrp_repeat = `setParent -query` + "|" + $columnLayoutChildren[10];
+			
+			MRS_ramp_AEreconnect($rampNodePlugName, $formLayout_ramp);
+			AEreplaceFloat($attrFieldSliderGrp_twist, $valueNodePlugName, "");
+			AEreplaceFloat($attrFieldSliderGrp_offset, $offsetNodePlugName, "");
+			AEreplaceFloat($attrFieldSliderGrp_falloffDistance, $falloffDistanceNodePlugName, "");
+			AEreplaceEnum($attrEnumOptionMenuGrp_falloffMode, $falloffModeNodePlugName, "");
+			AEreplaceBool($checkBoxGrp_repeat, $repeatNodePlugName, "");
+
+			//	"Delete" button is in a rowLayout
+			setParent $columnLayoutChildren[12];
+
+				string $deleteButtonControls[] = `rowLayout -q -childArray $columnLayoutChildren[12]`;
+				string $cmd = "removeMultiInstance -break true " + $nodePlugName + "; MRS_FlexiChainDouble_twistAdjustment_AEreplace " + $nodeName + ".twistAdjustment";
+				symbolButton -e -command $cmd $deleteButtonControls[1];
+
+			setParent ..; // columnLayout
+
+		// Get back to the main columnLayout
+		setParent ..; // tabLayout
+		setParent ..; // formLayout
+		setParent ..; // frameLayout
+		setParent ..; // columnLayout
+
+	setUITemplate -popTemplate;
+
+	// Again, edit the command used by the button in our custom ramp layout which expands the ramp view (see MRS_FlexiChainDouble_twistAdjustmentUI.mel for implementation)
+	string $formLayoutRampChildren[] = `formLayout -q -childArray $formLayout_ramp`;
+	string $button_buildRampUI = $formLayoutRampChildren[2];
+	button -e -c ("MRS_FlexiChainDouble_twistAdjustmentUI " + $nodePlugName) $button_buildRampUI;
+}
+
+
+global proc MRS_FlexiChainDouble_twistAdjustmentInteractiveMode_AEnew(string $nodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_Button_TwistAdjustmentContext;
+
+	string $buffer[];
+	tokenize($nodeAttrName, ".", $buffer);
+	string $nodeName = $buffer[0];
+	// Get the parent transform
+	string $parents[] = `listRelatives -parent $nodeName`;
+	string $parentNodeName = $parents[0];
+
+	setUITemplate -pushTemplate attributeEditorTemplate;
+
+		columnLayout -adj true;
+
+			rowLayout -nc 2;
+
+				text -label "";
+				string $annotation = "Toggles on/off a custom context which is designed to provide a way to interactively update the twist adjustments.";
+				// Command calls proc from MRS_FlexiChainDouble_rmbCallback.mel
+				$MRS_FLexiChainDouble_AE_Button_TwistAdjustmentContext = `button -label "Toggle Interactive Mode" -annotation $annotation
+					-c ("MRS_FlexiChainDouble_toggleTwistAdjustmentTool " + $parentNodeName)`;
+
+			setParent ..;
+
+		setParent ..;
+
+	setUITemplate -popTemplate;
+}
+
+
+global proc MRS_FlexiChainDouble_twistAdjustmentInteractiveMode_AEreplace(string $nodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_Button_TwistAdjustmentContext;
+
+	string $buffer[];
+	tokenize($nodeAttrName, ".", $buffer);
+	string $nodeName = $buffer[0];
+	// Get the parent transform
+	string $parents[] = `listRelatives -parent $nodeName`;
+	string $parentNodeName = $parents[0];
+
+	button -e -c ("MRS_FlexiChainDouble_toggleTwistAdjustmentTool " + $parentNodeName) $MRS_FLexiChainDouble_AE_Button_TwistAdjustmentContext;
+}
+
+
+// ------ Scale Adjustment ------------------------------------------------------------------------------------------------------------------------------------------------
+
+//	Description
+//	-----------
+//	This procedure creates a new layout for our compound array attribute and adds controls for any existing elements
+//	It attempts to follow Maya's default logic which can be found in the file "AEnewNonNumericMulti"
+//	It will produce a single global variable which holds the name of the outermost layout which can be used to retrieve child controls
+global proc MRS_FlexiChainDouble_scaleAdjustment_AEnew(string $scaleAdjustmentNodeAttrName)
+{
+	source "AEnewNonNumericMulti.mel";
+
+	// Global names
+	global string $MRS_FlexiChainDouble_AE_frameLayout_scaleAdjustment;
+
+	// Global values
+	global int $gMaxNonNumericMultis;
+
+	// Data
+	string $buffer[];
+	tokenize($scaleAdjustmentNodeAttrName, ".", $buffer);
+	string $nodeName = $buffer[0];
+
+	int $elementIndices[] = `getAttr -multiIndices $scaleAdjustmentNodeAttrName`;
+	int $numElements = size($elementIndices);
+
+	// UI
+	// By default, Maya adds a frameLayout to encapsulate all element controls, however we are already inside a frameLayout so it is not really necessary
+	// We will add one just for formatting of children, label will not be visible
+	$MRS_FlexiChainDouble_AE_frameLayout_scaleAdjustment = `frameLayout -labelVisible false -collapsable false`;
+
+		// Hide the columnLayout while we're creating controls
+		string $columnLayout_main = `columnLayout -adj true -rowSpacing 6 -vis false`;
+
+			// "Add New Item" button
+			rowLayout -numberOfColumns 2;
+
+				text -label "";
+				// This proc adds a new element plug to the array (it exists in the "AEnewNonNumericMulti" file)
+				// We then rely on the attribute editor refreshing and calling the replace proc which will result in the UI controls being added
+				button -label (uiRes("m_AEnewNonNumericMulti.kAddNewItem")) -command ("AEnewNonNumericMultiAddNewItem " + $nodeName + " scaleAdjustment");
+
+			setParent ..;
+
+			// If there are more than $gMaxNonNumericMultis elements, clip them
+			int $tooBig = 0;
+			if ( $numElements > $gMaxNonNumericMultis )
+			{
+				$tooBig = $numElements - $gMaxNonNumericMultis;
+				$numElements = $gMaxNonNumericMultis;
+			}
+
+			// Build controls for existing element plugs
+			for ( $i = 0; $i < $numElements; $i++ )
+				MRS_FlexiChainDouble_scaleAdjustment_AEnewControl( $nodeName, $elementIndices[$i]);
+			
+			// Tell the user if there are elements that we cannot display
+			if ( $tooBig > 0 )
+				text -l `format -s $tooBig (uiRes("m_AEnewNonNumericMulti.kInsufficientRoom"))`;
+
+		setParent ..;
+
+		// Make the columnLayout visible
+		columnLayout -e -vis true $columnLayout_main;
+
+	setParent ..;
+}
+
+
+//	Description
+//	-----------
+//	This procedure creates a new control for the array element plug given by the $elementIndex value
+//	Maya's default proc "AEnewNonNumericMultiCreateNewControl" can be used to do this automatically by passing "AEnewCompound" as the value for $attributeTypeProc
+//	However we want to manually define how child attribute controls are added, thus we are using a non-default implementation
+global proc MRS_FlexiChainDouble_scaleAdjustment_AEnewControl(string $nodeName, int $elementIndex)
+{
+	if ($elementIndex == -1) return;
+
+	// Data
+	string $plugLabel = "Scale Adjustment[" + (string)$elementIndex + "]";
+	string $nodePlugName = $nodeName + ".scaleAdjustment[" + (string)$elementIndex + "]";
+	string $nodeChildRampPlugName = $nodePlugName + ".scaleAdjustmentRamp";
+	string $nodeChildValuePlugName = $nodePlugName + ".scaleAdjustmentValue";
+	string $nodeChildOffsetPlugName = $nodePlugName + ".scaleAdjustmentOffset";
+	string $nodeChildFallofDistancePlugName = $nodePlugName + ".scaleAdjustmentFalloffDistance";
+	string $nodeChildFallofModePlugName = $nodePlugName + ".scaleAdjustmentFalloffMode";
+	string $nodeChildRepeatPlugName = $nodePlugName + ".scaleAdjustmentRepeat";
+
+	// UI
+	setUITemplate -pushTemplate attributeEditorTemplate;
+
+		frameLayout -collapsable true -label $plugLabel -collapse false;
+
+			// The default border for frameLayouts does not look great, we can use a tabLayout instead
+			string $formLayout_main = `formLayout`;
+
+				// The top border gets cutoff (fix applied later)
+				string $tabLayout_main = `tabLayout -tabsVisible false`;
+				
+				// Attach the tabLayout at the given offsets
+				formLayout -e
+					-attachForm $tabLayout_main "top"    0
+					-attachForm $tabLayout_main "left"   0
+					-attachForm $tabLayout_main "bottom" 0
+					-attachForm $tabLayout_main "right"  0
+					$formLayout_main;
+
+					columnLayout -adjustableColumn true;
+
+						MRS_FlexiChainDouble_customSpacer_AEnew();
+						// Maya does not allow a gradientControl to be created with a child ramp attribute
+						// The below proc will create a gradientControlNoAttr inside a formLayout (see MRS_rampTemplate.mel for details)
+						$formLayout_ramp = MRS_ramp_AEnew($nodeChildRampPlugName);
+
+						// This layout has been designed to replicate an attrFieldGrp (could have used AEnewVector)
+						// There is an issue when multiple attrFieldGrps are connected to a single attribute accross seperate UIs, affecting one control does not update the others
+						// Instead we will use seperate controls for each child attribute as floatFields do not have this issue
+						// Let the template define the width of the first column, an adjustable fifth column is added otherwise the fourth gets cut off
+						rowLayout -nc 5 -cw 2 70 -cw 3 70 -cw 4 70 -adj 5;
+							text -label "Scale";
+							string $floatVield_valueX = `floatField -step 0.01 -precision 3`;
+							connectControl $floatVield_valueX ($nodeChildValuePlugName + "X");
+							string $floatVield_valueY = `floatField -step 0.01 -precision 3`;
+							connectControl $floatVield_valueY ($nodeChildValuePlugName + "Y");
+							string $floatVield_valueZ = `floatField -step 0.01 -precision 3`;
+							connectControl $floatVield_valueZ ($nodeChildValuePlugName + "Z");
+						setParent ..;
+
+						// Note, the precision flag seems to have no affect on these controls, we have to use floatField and connectControl if we want access to precision
+						MRS_FlexiChainDouble_customSpacer_AEnew();
+						string $attrFieldSliderGrp_offset = AEnewFloat($nodeChildOffsetPlugName, "Offset", "");
+						attrFieldSliderGrp -e -fieldStep 0.001 $attrFieldSliderGrp_offset;
+						MRS_FlexiChainDouble_customSpacer_AEnew();
+						string $attrFieldSliderGrp_falloffDistance = AEnewFloat($nodeChildFallofDistancePlugName, "Falloff Distance", "");
+						attrFieldSliderGrp -e -fieldStep 0.001 $attrFieldSliderGrp_falloffDistance;
+						MRS_FlexiChainDouble_customSpacer_AEnew();
+						AEnewEnum($nodeChildFallofModePlugName, "Falloff Mode", "", {});
+						MRS_FlexiChainDouble_customSpacer_AEnew();
+						AEnewBool($nodeChildRepeatPlugName, "Repeat", "");
+						MRS_FlexiChainDouble_customSpacer_AEnew();
+
+						//	Delete button
+						setUITemplate -pushTemplate attributeEditorMultiTemplate;
+
+							rowLayout -nc 3;
+
+								text -label "";
+								// There appears to be a strange bug which forces the element plug at index 0 to always exist when the node is expanded in the Node Editor
+								// If we try to delete it from the AE, the UI controls for this initial element are dimmed but not removed
+								// The best we can do is ensure the controls are reset so that they are undimmed (ie. attempting to delete this initial element will have no effect)
+								string $cmd = "removeMultiInstance -break true " + $nodePlugName + "; MRS_FlexiChainDouble_scaleAdjustment_AEreplace " + $nodeName + ".scaleAdjustment";
+								symbolButton -image "smallTrash.png" -command $cmd;
+								text -label "";
+
+							setParent ..;
+
+						setUITemplate -popTemplate;
+
+					setParent ..;
+
+				setParent ..;
+
+				// Trick to get the top border back
+				string $tabLayout_topFix = `tabLayout -borderStyle "top" -tabsVisible false`;
+				formLayout -e
+					-attachForm $tabLayout_topFix "top"    0
+					-attachForm $tabLayout_topFix "left"   0
+					-attachForm $tabLayout_topFix "right"  0
+					$formLayout_main;
+
+				setParent ..;
+
+			setParent ..;
+
+		setParent ..;
+
+	setUITemplate -popTemplate;
+
+	// Edit the command used by the button in our custom ramp layout which expands the ramp view (see MRS_FlexiChainDouble_scaleAdjustmentUI.mel for implementation)
+	// We want this button to open the same window as the one which is opened by the rmb callback when the user right clicks on a manipulator in the scale adjustment context
+	string $formLayoutRampChildren[] = `formLayout -q -childArray $formLayout_ramp`;
+	string $button_buildRampUI = $formLayoutRampChildren[2];
+	// We are changing the command from the generic MRS_buildRampUI to one which provides extra controls for the scale adjustment
+	button -e -c ("MRS_FlexiChainDouble_scaleAdjustmentUI " + $nodePlugName) $button_buildRampUI;
+}
+
+
+//	Description
+//	-----------
+//	This proc retrieves child controls from the main frameLayout, set up in the AENew proc
+//	It determines which child controls, if any, can be reconnected based on the number of element plugs that the old and new node has
+//	If excess controls exist after reconnections have been made, then they will be removed
+//	If the new node has more element plugs than the previous node, additional controls will be added
+global proc MRS_FlexiChainDouble_scaleAdjustment_AEreplace(string $scaleAdjustmentNodeAttrName)
+{
+	// Global names
+	global string $MRS_FlexiChainDouble_AE_frameLayout_scaleAdjustment;
+
+	// Global values
+	global int $gMaxNonNumericMultis;
+
+	// Data
+	string $buffer[];
+	tokenize($scaleAdjustmentNodeAttrName, ".", $buffer);
+	string $nodeName = $buffer[0];
+
+	int $elementIndices[] = `getAttr -multiIndices $scaleAdjustmentNodeAttrName`;
+	int $numElements = size($elementIndices);
+
+	// UI
+	if (!`frameLayout -exists $MRS_FlexiChainDouble_AE_frameLayout_scaleAdjustment`)
+		return;
+
+	// Retrieve the main columnLayout
+	string $frameLayoutChildren[] = `frameLayout -q -childArray $MRS_FlexiChainDouble_AE_frameLayout_scaleAdjustment`;
+	string $columnLayout_main = $frameLayoutChildren[0];
+
+	setParent $columnLayout_main;
+
+	// Hide the columnLayout while we're modifying its children
+	columnLayout -e -vis false $columnLayout_main;
+
+	// Get the number of controls currently in the columnLayout
+	string $columnLayoutChildren[] = `columnLayout -q -childArray $columnLayout_main`;
+
+	// The first control is a row layout containing the "Add New Item" button
+	// Change the button command
+	if( size($columnLayoutChildren) > 0 )
+	{
+		setParent $columnLayoutChildren[0];
+			string $firstRowLayoutChildren[] = `rowLayout -query -childArray $columnLayoutChildren[0]`;
+			if( size($firstRowLayoutChildren) > 1 )
+				button -e -command ("AEnewNonNumericMultiAddNewItem " + $nodeName + " scaleAdjustment") $firstRowLayoutChildren[1];
+		setParent ..;
+	}
+
+	int $numCurrentControls = size($columnLayoutChildren);
+	int $numElementControls = $numCurrentControls - 1;
+
+	// If there are $gMaxNonNumericMultis + 1 items, we are displaying the max number of elements plus the "Add New Item" button
+	// If there are $gMaxNonNumericMultis + 2 items, we are displaying the max number of elements plus the "Add New Item" button plus the "Insufficient Room" label
+	// - Delete the label
+	if ( $numCurrentControls == $gMaxNonNumericMultis + 2 )
+	{
+		deleteUI $columnLayoutChildren[$gMaxNonNumericMultis + 1];
+		--$numCurrentControls;
+		--$numElementControls;
+	}
+
+	// If there are more than $gMaxNonNumericMultis elements, clip them
+	int $tooBig = 0;
+	if ( $numElements > $gMaxNonNumericMultis )
+	{
+		$tooBig = $numElements - $gMaxNonNumericMultis;
+		$numElements = $gMaxNonNumericMultis;
+	}
+
+	// We now either have to build more controls and reconnect all of them
+	// Or we have to delete excess control and reconnect all of them
+	if ($numElements >= $numElementControls)
+	{
+		// Reconnect the controls that we can
+		for ( $i = 0; $i < $numElementControls; $i++ )
+			MRS_FlexiChainDouble_scaleAdjustment_AEreconnectControl($nodeName, $elementIndices[$i], $columnLayoutChildren[$i + 1] );
+
+		for ( $i = $numElementControls; $i < $numElements; $i++ )
+			MRS_FlexiChainDouble_scaleAdjustment_AEnewControl($nodeName, $elementIndices[$i]);
+	}
+	else
+	{
+		// Reconnect the controls that we can
+		for ( $i = 0; $i < $numElements; $i++ )
+			MRS_FlexiChainDouble_scaleAdjustment_AEreconnectControl($nodeName, $elementIndices[$i], $columnLayoutChildren[$i + 1] );
+
+		// Delete any excess controls
+		for ( $i = $numElements; $i < $numElementControls; $i++ )
+			deleteUI $columnLayoutChildren[$i + 1];
+	}
+
+	// Recreate the label if there are elements that we cannot display
+	if ( $tooBig > 0 )
+		text -l `format -s $tooBig (uiRes("m_AEnewNonNumericMulti.kInsufficientRoom"))`;
+
+	columnLayout -e -vis true $columnLayout_main;
+}
+
+
+global proc MRS_FlexiChainDouble_scaleAdjustment_AEreconnectControl(string $nodeName, int $elementIndex, string $frameLayout_element)
+{
+	if ($elementIndex == -1) return;
+
+	// Data
+	string $plugLabel = "Scale Adjustment[" + (string)$elementIndex + "]";
+	string $nodePlugName = $nodeName + ".scaleAdjustment[" + (string)$elementIndex + "]";
+	string $rampNodePlugName = $nodePlugName + ".scaleAdjustmentRamp";
+	string $valueNodePlugName = $nodePlugName + ".scaleAdjustmentValue";
+	string $offsetNodePlugName = $nodePlugName + ".scaleAdjustmentOffset";
+	string $falloffDistanceNodePlugName = $nodePlugName + ".scaleAdjustmentFalloffDistance";
+	string $falloffModeNodePlugName = $nodePlugName + ".scaleAdjustmentFalloffMode";
+	string $repeatNodePlugName = $nodePlugName + ".scaleAdjustmentRepeat";
+
+	// UI
+	// Edit the frameLayout label
+	frameLayout -e -label $plugLabel $frameLayout_element;
+
+	// Get the columnLayout
+	string $frameLayoutChildren[] = `frameLayout -q -childArray $frameLayout_element`;
+	string $formLayout_element = $frameLayoutChildren[0];
+	string $formLayoutChildren[] = `formLayout -q -childArray $formLayout_element`;
+	string $tabLayout_element = $formLayoutChildren[0];
+	string $tabLayoutChildren[] = `tabLayout -q -childArray $tabLayout_element`;
+	string $columnLayout_element = $tabLayoutChildren[0];
+
+	setUITemplate -pushTemplate attributeEditorTemplate;
+
+		setParent $columnLayout_element;
+
+			// Get the columnLayout's children
+			string $columnLayoutChildren[] = `columnLayout -q -childArray $columnLayout_element`;
+			// Get the child control names
+			string $formLayout_ramp = `setParent -query` + "|" + $columnLayoutChildren[1];
+			string $rowLayout_scale = `setParent -query` + "|" + $columnLayoutChildren[2];
+			string $attrFieldSliderGrp_offset = `setParent -query` + "|" + $columnLayoutChildren[4];
+			string $attrFieldSliderGrp_falloffDistance = `setParent -query` + "|" + $columnLayoutChildren[6];
+			string $attrEnumOptionMenuGrp_falloffMode = `setParent -query` + "|" + $columnLayoutChildren[8];
+			string $checkBoxGrp_repeat = `setParent -query` + "|" + $columnLayoutChildren[10];
+			string $rowLayoutScaleChildren[] = `rowLayout -q -childArray $rowLayout_scale`;
+			string $floatField_scaleX = $rowLayoutScaleChildren[1];
+			string $floatField_scaleY = $rowLayoutScaleChildren[2];
+			string $floatField_scaleZ = $rowLayoutScaleChildren[3];
+			
+			MRS_ramp_AEreconnect($rampNodePlugName, $formLayout_ramp);
+			connectControl $floatField_scaleX ($valueNodePlugName + "X");
+			connectControl $floatField_scaleY ($valueNodePlugName + "Y");
+			connectControl $floatField_scaleZ ($valueNodePlugName + "Z");
+			AEreplaceFloat($attrFieldSliderGrp_offset, $offsetNodePlugName, "");
+			AEreplaceFloat($attrFieldSliderGrp_falloffDistance, $falloffDistanceNodePlugName, "");
+			AEreplaceEnum($attrEnumOptionMenuGrp_falloffMode, $falloffModeNodePlugName, "");
+			AEreplaceBool($checkBoxGrp_repeat, $repeatNodePlugName, "");
+
+			//	"Delete" button is in a rowLayout
+			setParent $columnLayoutChildren[12];
+
+				string $deleteButtonControls[] = `rowLayout -q -childArray $columnLayoutChildren[12]`;
+				string $cmd = "removeMultiInstance -break true " + $nodePlugName + "; MRS_FlexiChainDouble_scaleAdjustment_AEreplace " + $nodeName + ".scaleAdjustment";
+				symbolButton -e -command $cmd $deleteButtonControls[1];
+
+			setParent ..; // columnLayout
+
+		// Get back to the main columnLayout
+		setParent ..; // tabLayout
+		setParent ..; // formLayout
+		setParent ..; // frameLayout
+		setParent ..; // columnLayout
+
+	setUITemplate -popTemplate;
+
+	// Again, edit the command used by the button in our custom ramp layout which expands the ramp view (see MRS_FlexiChainDouble_scaleAdjustmentUI.mel for implementation)
+	string $formLayoutRampChildren[] = `formLayout -q -childArray $formLayout_ramp`;
+	string $button_buildRampUI = $formLayoutRampChildren[2];
+	button -e -c ("MRS_FlexiChainDouble_scaleAdjustmentUI " + $nodePlugName) $button_buildRampUI;
+}
+
+
+global proc MRS_FlexiChainDouble_scaleAdjustmentInteractiveMode_AEnew(string $nodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_Button_ScaleAdjustmentContext;
+
+	string $buffer[];
+	tokenize($nodeAttrName, ".", $buffer);
+	string $nodeName = $buffer[0];
+	// Get the parent transform
+	string $parents[] = `listRelatives -parent $nodeName`;
+	string $parentNodeName = $parents[0];
+
+	setUITemplate -pushTemplate attributeEditorTemplate;
+
+		columnLayout -adj true;
+
+			rowLayout -nc 2;
+
+				text -label "";
+				string $annotation = "Toggles on/off a custom context which is designed to provide a way to interactively update the scale adjustments.";
+				// Command calls proc from MRS_FlexiChainDouble_rmbCallback.mel
+				$MRS_FLexiChainDouble_AE_Button_ScaleAdjustmentContext = `button -label "Toggle Interactive Mode" -annotation $annotation
+					-c ("MRS_FlexiChainDouble_toggleScaleAdjustmentTool " + $parentNodeName)`;
+
+			setParent ..;
+
+		setParent ..;
+
+	setUITemplate -popTemplate;
+}
+
+
+global proc MRS_FlexiChainDouble_scaleAdjustmentInteractiveMode_AEreplace(string $nodeAttrName)
+{
+	global string $MRS_FLexiChainDouble_AE_Button_ScaleAdjustmentContext;
+
+	string $buffer[];
+	tokenize($nodeAttrName, ".", $buffer);
+	string $nodeName = $buffer[0];
+	// Get the parent transform
+	string $parents[] = `listRelatives -parent $nodeName`;
+	string $parentNodeName = $parents[0];
+
+	button -e -c ("MRS_FlexiChainDouble_toggleScaleAdjustmentTool " + $parentNodeName) $MRS_FLexiChainDouble_AE_Button_ScaleAdjustmentContext;
+}

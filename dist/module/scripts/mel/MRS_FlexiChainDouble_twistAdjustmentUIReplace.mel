@@ -1,0 +1,24 @@
+// ------ Twist Adjustment Window - Replace-------------------------------------------------------------------------------------------------------------------------------------------
+
+global string $MRS_FlexiChainDouble_TwistAdjustmentUI_WorkspaceControl = "MRS_FlexiChainDouble_TwistAdjustmentUI_WorkspaceControl";
+global string $MRS_FlexiChainDouble_TwistAjustmentUI = "MRS_FlexiChainDouble_TwistAjustmentUI";
+
+global proc MRS_FlexiChainDouble_twistAdjustmentUIReplace(string $nodeManipPlugName)
+{
+	// Global values
+	global string $MRS_FlexiChainDouble_TwistAdjustmentUI_WorkspaceControl;
+	global string $MRS_FlexiChainDouble_TwistAjustmentUI;
+	
+	if (`workspaceControl -q -exists $MRS_FlexiChainDouble_TwistAdjustmentUI_WorkspaceControl` && `workspaceControl -q -visible $MRS_FlexiChainDouble_TwistAdjustmentUI_WorkspaceControl`)
+	{
+		if (`window -q -exists $MRS_FlexiChainDouble_TwistAjustmentUI`)
+		{
+			if (`window -q -title $MRS_FlexiChainDouble_TwistAjustmentUI` == ($nodeManipPlugName + ".twistAdjustmentRamp"))
+				return;
+		}
+		
+		int $isCollapsed = `workspaceControl -q -collapse $MRS_FlexiChainDouble_TwistAdjustmentUI_WorkspaceControl`;
+		MRS_FlexiChainDouble_twistAdjustmentUINew $nodeManipPlugName;
+		workspaceControl -e -collapse $isCollapsed $MRS_FlexiChainDouble_TwistAdjustmentUI_WorkspaceControl;
+	}
+}

@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+	<using package='maya'/>
+	<template name='NEmrs_PackDoubleArray'>
+		<attribute name='message' type='maya.message'>
+			<label>Message</label>
+		</attribute>
+		<attribute name='output' type='maya.doubleArray'>
+			<label>Output</label>
+		</attribute>
+		<attribute name='input' type='maya.double'>
+			<label>Input</label>
+		</attribute>
+		<attribute name='fill' type='maya.double'>
+			<label>Fill</label>
+		</attribute>
+    <attribute name='fillLogically' type='maya.boolean'>
+      <label>Fill Logically</label>
+    </attribute>
+		<attribute name='size' type='maya.long'>
+			<label>Size</label>
+		</attribute>
+	</template>
+	<view name='NEDefault' template='NEmrs_PackDoubleArray'>
+		<property name='message'/>
+		<property name='output'/>
+		<property name='input'/>
+		<property name='fill'/>
+    <property name='fillLogically'/>
+    <property name='size'/>
+	</view>
+</templates>

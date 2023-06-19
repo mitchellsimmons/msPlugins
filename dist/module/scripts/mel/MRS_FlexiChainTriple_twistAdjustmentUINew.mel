@@ -1,0 +1,144 @@
+source "MRS_rampTemplate";
+
+// ------ Twist Adjustment Window - New -------------------------------------------------------------------------------------------------------------------------------------------
+
+// Because the window is going to be reparented to a workspace control, its controls must be assigned constant names for the callbacks to work
+global string $MRS_FlexiChainTriple_TwistAdjustmentUI_WorkspaceControl = "MRS_FlexiChainTriple_TwistAdjustmentUI_WorkspaceControl";
+global string $MRS_FlexiChainTriple_TwistAjustmentUI = "MRS_FlexiChainTriple_TwistAjustmentUI";
+global string $MRS_FlexiChainTriple_TwistAjustmentUI_FormLayout = "MRS_FlexiChainTriple_TwistAjustmentUI_FormLayout";
+global string $MRS_FlexiChainTriple_TwistAjustmentUI_GradientControl = "MRS_FlexiChainTriple_TwistAjustmentUI_GradientControl";
+global string $MRS_FlexiChainTriple_TwistAjustmentUI_AttrField_SelectedPosition = "MRS_FlexiChainTriple_TwistAjustmentUI_AttrField_SelectedPosition";
+global string $MRS_FlexiChainTriple_TwistAjustmentUI_AttrField_SelectedValue = "MRS_FlexiChainTriple_TwistAjustmentUI_AttrField_SelectedValue";
+global string $MRS_FlexiChainTriple_TwistAjustmentUI_AttrEnum_SelectedInterp = "MRS_FlexiChainTriple_TwistAjustmentUI_AttrEnum_SelectedInterp";
+
+global proc MRS_FlexiChainTriple_twistAdjustmentUINew(string $nodeManipPlugName)
+{
+	// Global values
+	global int $MRS_Ramp_Value_OptionVarIndex;
+
+	// Global controls
+	global string $MRS_FlexiChainTriple_TwistAjustmentUI;
+	global string $MRS_FlexiChainTriple_TwistAjustmentUI_FormLayout;
+	global string $MRS_FlexiChainTriple_TwistAjustmentUI_GradientControl;
+	global string $MRS_FlexiChainTriple_TwistAjustmentUI_AttrField_SelectedPosition;
+	global string $MRS_FlexiChainTriple_TwistAjustmentUI_AttrField_SelectedValue;
+	global string $MRS_FlexiChainTriple_TwistAjustmentUI_AttrEnum_SelectedInterp;
+
+	string $buffer[];
+	tokenize($nodeManipPlugName, ".", $buffer);
+	string $nodeName = $buffer[0];
+	string $rampAttrName = "twistAdjustmentRamp";
+	string $rampNodeAttrName = $nodeManipPlugName + "." + $rampAttrName;
+
+	if (`window -exists $MRS_FlexiChainTriple_TwistAjustmentUI`)
+	{
+		deleteUI $MRS_FlexiChainTriple_TwistAjustmentUI;
+		//windowPref -remove $MRS_FlexiChainTriple_TwistAjustmentUI;
+	}
+
+	// Build an optionVar which will be used to set the initial control points of the gradientControl
+	int $elementIndices[] = `getAttr -multiIndices $rampNodeAttrName`;
+	if (size($elementIndices) == 0)
+	{
+		// Force an element plug into existence
+		$elementIndices = {0};
+		float $controlPointValues[] = `getAttr ($rampNodeAttrName + "[0]")`;
+		optionVar -stringValueAppend ("MRS_rampOptionVar" + (string)$MRS_Ramp_Value_OptionVarIndex) 
+			((string)$controlPointValues[1] + "," + (string)$controlPointValues[0] + "," + (string)$controlPointValues[2]);
+	}
+	else
+	{
+		// Retrieve values for each element plug
+		for ($i = 0; $i <= $elementIndices[size($elementIndices) - 1]; ++$i)
+		{
+			float $controlPointValues[] = `getAttr ($rampNodeAttrName + "[" + (string)$i + "]")`;
+			optionVar -stringValueAppend ("MRS_rampOptionVar" + (string)$MRS_Ramp_Value_OptionVarIndex) 
+				((string)$controlPointValues[1] + "," + (string)$controlPointValues[0] + "," + (string)$controlPointValues[2]);
+		}
+	}
+
+	// Build UI
+	window -widthHeight 1100 300 -title $rampNodeAttrName $MRS_FlexiChainTriple_TwistAjustmentUI;
+
+	formLayout $MRS_FlexiChainTriple_TwistAjustmentUI_FormLayout;
+
+		gradientControlNoAttr -optionVar ("MRS_rampOptionVar" + (string)$MRS_Ramp_Value_OptionVarIndex) $MRS_FlexiChainTriple_TwistAjustmentUI_GradientControl;
+		
+		$columnLayout_settings = `columnLayout -adj 1 -rowSpacing 7 -width 403`;
+
+			frameLayout -label "Control Point" -collapsable true -backgroundShade true -marginHeight 7;
+
+				columnLayout -rowSpacing 7 -adj 1;
+
+					attrFieldSliderGrp -label "Selected Position " -at ($rampNodeAttrName + "[0]." + $rampAttrName + "_Position") 
+						-step 0.001 $MRS_FlexiChainTriple_TwistAjustmentUI_AttrField_SelectedPosition;
+					attrFieldSliderGrp -label "Selected Value " -at ($rampNodeAttrName + "[0]." + $rampAttrName + "_FloatValue") 
+						-step 0.001 $MRS_FlexiChainTriple_TwistAjustmentUI_AttrField_SelectedValue;
+
+					columnLayout -columnAttach "left" 58;
+						attrEnumOptionMenu -label "Selected Interp "-at ($rampNodeAttrName + "[0]." + $rampAttrName + "_Interp") 
+							$MRS_FlexiChainTriple_TwistAjustmentUI_AttrEnum_SelectedInterp;
+					setParent ..;
+					
+				setParent ..;
+
+			setParent ..;
+
+			frameLayout -label "Adjustments" -collapsable true -backgroundShade true -marginHeight 7;
+
+				columnLayout -rowSpacing 7 -adj 1;
+
+				 	attrFieldSliderGrp -label "Twist " -at ($nodeManipPlugName + ".twistAdjustmentValue") -step 1.0 -precision 3;
+					attrFieldSliderGrp -label "Offset " -at ($nodeManipPlugName + ".twistAdjustmentOffset") -step 0.001;
+					attrFieldSliderGrp -label "Falloff Distance " -at ($nodeManipPlugName + ".twistAdjustmentFalloffDistance") -step 0.001;
+					attrEnumOptionMenuGrp -label "Falloff Mode " -at ($nodeManipPlugName + ".twistAdjustmentFalloffMode");
+					string $checkBoxGrp_repeat = `checkBoxGrp -label "Repeat "`;
+					connectControl -index 2 $checkBoxGrp_repeat ($nodeManipPlugName + ".twistAdjustmentRepeat");
+
+				setParent ..;
+
+			setParent ..;
+
+		setParent ..;
+
+		formLayout -edit
+			-attachForm $MRS_FlexiChainTriple_TwistAjustmentUI_GradientControl "left" 5
+			-attachForm $MRS_FlexiChainTriple_TwistAjustmentUI_GradientControl "top" 9
+			-attachForm $MRS_FlexiChainTriple_TwistAjustmentUI_GradientControl "bottom" 9
+			-attachControl $MRS_FlexiChainTriple_TwistAjustmentUI_GradientControl "right" 4 $columnLayout_settings
+			-attachForm $columnLayout_settings "top"    9
+			-attachForm $columnLayout_settings "bottom" 9
+			-attachForm $columnLayout_settings "right"  5
+			$MRS_FlexiChainTriple_TwistAjustmentUI_FormLayout;
+
+	setParent ..;
+
+	// Delete the optionVar and increment the index (the reason for this is explained in the attrField change callback)
+	optionVar -remove ("MRS_rampOptionVar" + (string)$MRS_Ramp_Value_OptionVarIndex);
+	++$MRS_Ramp_Value_OptionVarIndex;
+
+	// Add callbacks and scriptJobs
+	string $rampCurrentKeyChangedCmd = "MRS_ramp_AEkeyChangedCallback " + $rampNodeAttrName + " " + $MRS_FlexiChainTriple_TwistAjustmentUI_GradientControl + " " + 
+		$MRS_FlexiChainTriple_TwistAjustmentUI_AttrField_SelectedPosition + " " + $MRS_FlexiChainTriple_TwistAjustmentUI_AttrField_SelectedValue + " " + $MRS_FlexiChainTriple_TwistAjustmentUI_AttrEnum_SelectedInterp;
+	gradientControlNoAttr -e -currentKeyChanged $rampCurrentKeyChangedCmd $MRS_FlexiChainTriple_TwistAjustmentUI_GradientControl;
+
+	string $rampDragCmd = "MRS_ramp_AEdragCallback " + $rampNodeAttrName + " " + $MRS_FlexiChainTriple_TwistAjustmentUI_GradientControl;
+	gradientControlNoAttr -e -dragCommand $rampDragCmd $MRS_FlexiChainTriple_TwistAjustmentUI_GradientControl;
+
+	// When the mouse is released we also ensure the AE is refreshed as this window is essentially acting as a duplicate to one of the AE gradientControls
+	string $rampChangeCmd = "MRS_ramp_AEchangeCallback; updateAE " + $nodeName;
+	gradientControlNoAttr -e -changeCommand $rampChangeCmd $MRS_FlexiChainTriple_TwistAjustmentUI_GradientControl;
+
+	// As with the mouse release, we ensure the AE is refreshed when one of the attrFields is updated
+	string $attrChangedCmd = "MRS_rampAttrField_AEchangeCallback " + $rampNodeAttrName + " " + $MRS_FlexiChainTriple_TwistAjustmentUI_GradientControl + "; updateAE " + $nodeName;
+	attrFieldSliderGrp -e -changeCommand $attrChangedCmd $MRS_FlexiChainTriple_TwistAjustmentUI_AttrField_SelectedPosition;
+	attrFieldSliderGrp -e -changeCommand $attrChangedCmd $MRS_FlexiChainTriple_TwistAjustmentUI_AttrField_SelectedValue;
+	attrEnumOptionMenu -e -changeCommand $attrChangedCmd $MRS_FlexiChainTriple_TwistAjustmentUI_AttrEnum_SelectedInterp;
+
+	// Because only one instance of the window can exist, the scriptJobs will never duplicate and will always be removed with the window when it is closed
+	string $undoRedoCmd = "MRS_ramp_AEundoRedoCallback " + $rampNodeAttrName + " " + $MRS_FlexiChainTriple_TwistAjustmentUI_GradientControl;
+	scriptJob -parent $MRS_FlexiChainTriple_TwistAjustmentUI -event "Undo" $undoRedoCmd;
+	scriptJob -parent $MRS_FlexiChainTriple_TwistAjustmentUI -event "Redo" $undoRedoCmd;
+
+	python("import MRS_FlexiChainTriple_twistAdjustmentUIDock\nMRS_FlexiChainTriple_twistAdjustmentUIDock.twistAdjustmentDockUI()");
+}

@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templates>
+	<using package='maya'/>
+	<template name='NEmrs_ClosestPointOnLine'>
+		<attribute name='output' type='maya.double3'>
+			<label>Output</label>
+		</attribute>
+		<attribute name='message' type='maya.message'>
+			<label>Message</label>
+		</attribute>
+		<attribute name='target' type='maya.double3'>
+			<label>Target</label>
+		</attribute>
+		<attribute name='pointOnLine1' type='maya.double3'>
+			<label>Point On Line 1</label>
+		</attribute>
+		<attribute name='pointOnLine2' type='maya.double3'>
+			<label>Point On Line 2</label>
+		</attribute>
+	</template>
+	<view name='NEDefault' template='NEmrs_ClosestPointOnLine'>
+		<property name='output'/>
+		<property name='message'/>
+		<property name='target'/>
+		<property name='pointOnLine1'/>
+		<property name='pointOnLine2'/>
+	</view>
+</templates>

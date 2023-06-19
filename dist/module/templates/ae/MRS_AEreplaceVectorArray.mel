@@ -1,0 +1,126 @@
+// Source scripts for access to internal globals
+source "AEreplaceNonNumericMulti.mel";
+source "MRS_AEnewVectorArray.mel";
+
+// ------ Private ------------------------------------------------------------------------------------------------------------------------------------------------
+
+proc MRS_AEreplaceVectorArrayControl(string $nodeAttrName, int $elementIndex, string $formLayout)
+{
+    if ($elementIndex == -1) return;
+
+    // Data
+    string $nodePlugName = $nodeAttrName + "[" + $elementIndex + "]";
+    string $plugNiceName = `attributeName -nice $nodePlugName`;
+
+    string $formLayoutChildren[] = `formLayout -q -childArray $formLayout`;
+    string $attrFieldGrp = $formLayoutChildren[0];
+    string $symbolButton = $formLayoutChildren[1];
+
+    attrFieldGrp -e -l $plugNiceName -attribute $nodePlugName $attrFieldGrp;
+    symbolButton -e -command ("removeMultiInstance -break true " + $nodePlugName) $symbolButton;
+}
+
+
+// ------ Public ------------------------------------------------------------------------------------------------------------------------------------------------
+
+//  Description
+//  -----------
+//  This procedure retrieves child controls from the given frameLayout, set up in the MRS_AEnewVectorArray proc
+//  It determines which child controls, if any, can be reconnected based on the number of element plugs that the old and new node has
+//  It ensures each reconnected control is renamed with the correct logical index (Maya displays physical indices by default)
+//  If excess controls exist after reconnections have been made, then they will be removed
+//  If the new node has more element plugs than the previous node, additional controls will be added
+global proc MRS_AEreplaceVectorArray(string $nodeAttrName, string $frameLayout)
+{
+    // Global values
+    global int $gMaxNonNumericMultis;
+
+    // Data
+    string $buffer[];
+    tokenize($nodeAttrName, ".", $buffer);
+    string $nodeName = $buffer[0];
+    string $attrName = $buffer[1];
+    string $attrNiceName = `attributeName -nice $nodeAttrName`;
+
+    int $elementIndices[] = `getAttr -multiIndices $nodeAttrName`;
+    int $numElements = size($elementIndices);
+
+    // UI
+    if (!`frameLayout -exists $frameLayout`)
+        return;
+
+    // Retrieve the main columnLayout
+    string $frameLayoutChildren[] = `frameLayout -q -childArray $frameLayout`;
+    string $columnLayout_main = $frameLayoutChildren[1];
+
+    setParent $columnLayout_main;
+
+    // Hide the columnLayout while we're modifying its children
+    columnLayout -e -vis false $columnLayout_main;
+
+    // Get the number of controls currently in the columnLayout
+    string $columnLayoutChildren[] = `columnLayout -q -childArray $columnLayout_main`;
+
+    // The first control is a row layout containing the "Add New Item" button
+    // Change the button command
+    if( size($columnLayoutChildren) > 0 )
+    {
+        setParent $columnLayoutChildren[0];
+            string $firstRowLayoutChildren[] = `rowLayout -query -childArray $columnLayoutChildren[0]`;
+            if( size($firstRowLayoutChildren) > 1 )
+                button -e -command ("AEnewNonNumericMultiAddNewItem " + $nodeName + " " + $attrName) $firstRowLayoutChildren[1];
+        setParent ..;
+    }
+
+    int $numCurrentControls = size($columnLayoutChildren);
+    int $numElementControls = $numCurrentControls - 1;
+
+    // If there are $gMaxNonNumericMultis + 1 items, we are displaying the max number of elements plus the "Add New Item" button
+    // If there are $gMaxNonNumericMultis + 2 items, we are displaying the max number of elements plus the "Add New Item" button plus the "Insufficient Room" label
+    // - Delete the label
+    if ( $numCurrentControls == $gMaxNonNumericMultis + 2 )
+    {
+        deleteUI $columnLayoutChildren[$gMaxNonNumericMultis + 1];
+        --$numCurrentControls;
+        --$numElementControls;
+    }
+
+    // If there are more than $gMaxNonNumericMultis elements, clip them
+    int $tooBig = 0;
+    if ( $numElements > $gMaxNonNumericMultis )
+    {
+        $tooBig = $numElements - $gMaxNonNumericMultis;
+        $numElements = $gMaxNonNumericMultis;
+    }
+
+    // We now either have to build more controls and reconnect all of them
+    // Or we have to delete excess control and reconnect all of them
+    if ($numElements >= $numElementControls)
+    {
+        // Reconnect the controls that we can (we pass the name of the parent formLayout created by AEnewVectorArray proc)
+        for ( $i = 0; $i < $numElementControls; $i++ )
+            // AEreplaceNonNumericMultiReconnectControl($nodeName, $attrName, "\"\"", "AEreplaceVector", $columnLayoutChildren[$i + 1], $elementIndices[$i] );
+            MRS_AEreplaceVectorArrayControl($nodeAttrName, $elementIndices[$i], $columnLayoutChildren[$i + 1]);
+
+        for ( $i = $numElementControls; $i < $numElements; $i++ )
+            // AEnewNonNumericMultiCreateNewControl( $nodeName, $attrName, "\"\"", "AEnewVector", $elementIndices[$i]);
+            MRS_AEnewVectorArrayControl($nodeAttrName, $elementIndices[$i]);
+    }
+    else
+    {
+        // Reconnect the controls that we can
+        for ( $i = 0; $i < $numElements; $i++ )
+            // AEreplaceNonNumericMultiReconnectControl($nodeName, $attrName, "\"\"", "AEreplaceVector", $columnLayoutChildren[$i + 1], $elementIndices[$i] );
+            MRS_AEreplaceVectorArrayControl($nodeAttrName, $elementIndices[$i], $columnLayoutChildren[$i + 1]);
+
+        // Delete any excess controls
+        for ( $i = $numElements; $i < $numElementControls; $i++ )
+            deleteUI $columnLayoutChildren[$i + 1];
+    }
+
+    // Recreate the label if there are elements that we cannot display
+    if ( $tooBig > 0 )
+        text -l `format -s $tooBig (uiRes("m_AEnewNonNumericMulti.kInsufficientRoom"))`;
+
+    columnLayout -e -vis true $columnLayout_main;
+}
